@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define DEBUG
+
 
 int maze_size;
 char maze[20][20];
@@ -26,7 +28,6 @@ void save_dist (int id)
 {
     int i;
 
-    dist_matrix[id][0] = 0;
     for (i = 0; i < treas_count; i++)
         dist_matrix[i+1][id] = dist_matrix[id][i+1] = dist[graph_rev[treas[i]]];
 }
@@ -70,9 +71,13 @@ void calc_distances (int id)
 }
 
 
+/* /\* routine recursive *\/ */
+/* int find_min_way (); */
+
+
 int main(int argc, char *argv[])
 {
-    int n, i, j, id, t;
+    int n, i, j, id, t, k;
 
     scanf ("%d", &n);
 
@@ -88,16 +93,28 @@ int main(int argc, char *argv[])
             for (j = 0; j < maze_size; j++) {
                 switch (getchar ()) {
                 case '.':
+#ifdef DEBUG
+                    putchar ('.');
+#endif
                     break;
                 case '*':
+#ifdef DEBUG
+                    putchar ('*');
+#endif
                     treas[treas_count++] = i*maze_size + j;
                     break;
                 case '#':
+#ifdef DEBUG
+                    putchar ('#');
+#endif
                     maze[i][j] = 1;
                     break;
                 }
             }
             getchar ();
+#ifdef DEBUG
+            putchar ('\n');
+#endif
         }
         getchar ();
 
@@ -128,20 +145,7 @@ int main(int argc, char *argv[])
             }
         }
 
-        for (i = 0; i < maze_size; i++) {
-            for (j = 0; j < maze_size; j++)
-                printf ("%d ", i * maze_size + j);
-            putchar ('\n');
-        }
-
-        for (i = 0; i < maze_size; i++) {
-            for (j = 0; j < maze_size; j++) {
-                putchar (maze[i][j] ? '#' : '.');
-            }
-            putchar ('\n');
-        }
-
-
+#ifdef DEBUG
         for (i = 0; i < maze_size*maze_size; i++) {
             printf ("%d:", i);
 
@@ -150,6 +154,17 @@ int main(int argc, char *argv[])
             putchar ('\n');
         }
 
+        printf ("Treasures\n");
+        for (i = 0; i < treas_count; i++)
+            printf ("%d ", treas[i]);
+        printf ("\n");
+#endif
+
+        /* prepare distance matrix */
+        for (i = 0; i < treas_count+2; i++)
+            for (j = 0; j < treas_count+2; j++)
+                dist_matrix[i][j] = -1;
+            
         /* find distance from entry to all treasures */
         calc_distances (0);
         save_dist (0);
@@ -157,22 +172,61 @@ int main(int argc, char *argv[])
         /* find distance from any treasure to all other treasures */
         for (i = 0; i < treas_count; i++) {
             calc_distances (treas[i]);
-            save_dist (treas[i]);
+            save_dist (i+1);
         }
 
         /* find distance from exit to all treasures */
         calc_distances (maze_size * maze_size - 1);
-        save_dist (maze_size * maze_size - 1);
+        save_dist (treas_count+1);
 
         /* find optimal way to gather all treasures and exit */
+#ifdef DEBUG
         putchar ('\n');
         for (i = 0; i < treas_count+2; i++) {
-            printf ("%d:", i);
+            printf ("%d: ", i);
 
             for (j = 0; j < treas_count+2; j++)
-                printf ("%d ", dist_matrix[i][j]);
+                printf ("%2d ", dist_matrix[i][j]);
             putchar ('\n');
         }
+#endif
+
+        memset (done, 0, (treas_count+2)*sizeof (done[0]));
+        done[0] = 1;
+        /* i - count of collected treasures */
+        /* k - current treasure or entry/exit */
+        /* t - count of steps performed */
+        i = k = t = 0;
+        while (k != treas_count+1) {
+            id = -1;
+            for (j = 0; j < treas_count+2; j++) {
+                if (j == treas_count+1 && i != treas_count)
+                    break;
+                if (done[j])
+                    continue;
+                if (k == j)
+                    continue;
+                if (dist_matrix[k][j] < 0)
+                    continue;
+                if (id < 0 || dist_matrix[k][id] > dist_matrix[k][j])
+                    id = j;
+            }
+
+            if (id < 0) {
+                t = -1;
+                break;
+            }
+            
+            done[id] = 1;
+#ifdef DEBUG
+            printf ("%d -> %d (%d)\n", k, id, dist_matrix[k][id]);
+#endif            
+            t += dist_matrix[k][id];
+            k = id;
+            i++;
+        }
+
+        printf ("%d\n", t);
     }
 
     return 0;

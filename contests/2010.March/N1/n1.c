@@ -2,8 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define DEBUG
-
+#define NDEBUG
 
 int maze_size;
 char maze[20][20];
@@ -68,11 +67,50 @@ void calc_distances (int id)
         }
         done[k] = 1;
     }
+
+#ifdef DEBUG
+    printf ("Dist from %d:\n", id);
+    for (i = 0; i < graph_size; i++)
+        printf ("%d: %d\n", i, dist[i]);
+    printf ("\n");
+#endif
 }
 
 
-/* /\* routine recursive *\/ */
-/* int find_min_way (); */
+/* routine recursively searches for minimal way, starting from given */
+int find_min_way (int start, int route_length)
+{
+    int i, dist, min_dist = -1;
+
+    if (route_length == treas_count+1) {
+        return dist_matrix[start][treas_count+1];
+    }
+    else {
+        for (i = 0; i < treas_count+1; i++) {
+            if (done[i])
+                continue;
+            if (i == start)
+                continue;
+            if (dist_matrix[start][i] < 0)
+                continue;
+
+            done[i] = 1;
+#ifdef DEBUG
+            printf ("%d -> %d (%d)\n", start, i, dist_matrix[start][i]);
+#endif
+            dist = find_min_way (i, route_length+1);
+            done[i] = 0;
+            if (dist > 0) {
+                dist += dist_matrix[start][i];
+        
+                if (min_dist < 0 || dist < min_dist)
+                    min_dist = dist;
+            }
+        }
+    }
+
+    return min_dist;
+}
 
 
 int main(int argc, char *argv[])
@@ -117,6 +155,11 @@ int main(int argc, char *argv[])
 #endif
         }
         getchar ();
+
+        if (maze_size == 1) {
+            printf ("0\n");
+            continue;
+        }
 
         graph_size = 0;
 
@@ -168,6 +211,8 @@ int main(int argc, char *argv[])
         /* find distance from entry to all treasures */
         calc_distances (0);
         save_dist (0);
+        if (graph_size > 0)
+            dist_matrix[0][treas_count+1] = dist_matrix[treas_count+1][0] = dist[graph_size-1];
 
         /* find distance from any treasure to all other treasures */
         for (i = 0; i < treas_count; i++) {
@@ -191,42 +236,14 @@ int main(int argc, char *argv[])
         }
 #endif
 
-        memset (done, 0, (treas_count+2)*sizeof (done[0]));
-        done[0] = 1;
-        /* i - count of collected treasures */
-        /* k - current treasure or entry/exit */
-        /* t - count of steps performed */
-        i = k = t = 0;
-        while (k != treas_count+1) {
-            id = -1;
-            for (j = 0; j < treas_count+2; j++) {
-                if (j == treas_count+1 && i != treas_count)
-                    break;
-                if (done[j])
-                    continue;
-                if (k == j)
-                    continue;
-                if (dist_matrix[k][j] < 0)
-                    continue;
-                if (id < 0 || dist_matrix[k][id] > dist_matrix[k][j])
-                    id = j;
-            }
-
-            if (id < 0) {
-                t = -1;
-                break;
-            }
-            
-            done[id] = 1;
-#ifdef DEBUG
-            printf ("%d -> %d (%d)\n", k, id, dist_matrix[k][id]);
-#endif            
-            t += dist_matrix[k][id];
-            k = id;
-            i++;
+        if (!treas_count)
+            printf ("%d\n", dist_matrix[0][1]);
+        else {
+            memset (done, 0, (treas_count+2)*sizeof (done[0]));
+            done[0] = 1;
+            t = find_min_way (0, 1);
+            printf ("%d\n", t);
         }
-
-        printf ("%d\n", t);
     }
 
     return 0;

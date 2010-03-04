@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define NDEBUG
+#define DEBUG
 
 int maze_size;
 char maze[20][20];
@@ -15,29 +15,19 @@ int incidence[200][5];
 
 /* IDs of graph nodes */
 int graph[200];
-int graph_rev[200];
-int graph_size;
 int dist[200];
 int done[200];
 
 int dist_matrix[20][20];
+int entry_exit_dist[20][2];
 
-
-
-void save_dist (int id)
-{
-    int i;
-
-    for (i = 0; i < treas_count; i++)
-        dist_matrix[i+1][id] = dist_matrix[id][i+1] = dist[graph_rev[treas[i]]];
-}
 
 
 int min_distance ()
 {
     int id = -1, i;
 
-    for (i = 0; i < graph_size; i++)
+    for (i = 0; i < maze_size * maze_size; i++)
         if (!done[i] && dist[i] >= 0) {
             if (id < 0 || dist[id] > dist[i])
                 id = i;
@@ -47,20 +37,19 @@ int min_distance ()
 }
 
 
-/* calculate minimal distances from given point to all other nodes in graph */
-void calc_distances (int id)
+/* calculate minimal distances from given point to all other nodes in graph,
+ * saving treasures distances to result array */
+void calc_distances (int id, int *res, int *entry_exit)
 {
-    int i, j, k, l;
-    for (i = 0; i < graph_size; i++) {
+    int i, k, l;
+    for (i = 0; i < maze_size*maze_size; i++) {
         done[i] = 0;
-        dist[i] = (graph[i] == id) ? 0 : -1;
+        dist[i] = (i == id) ? 0 : -1;
     }
 
     while ((k = min_distance ()) >= 0) {
-        /* k is graph's index */
-        j = graph[k];
-        for (i = 0; i < incidence[j][0]; i++) {
-            l = graph_rev[incidence[j][i+1]];
+        for (i = 0; incidence[k][i] >= 0; i++) {
+            l = incidence[k][i+1];
             if (!done[l]) {
                 if (dist[l] < 0 || dist[l] > dist[k]+1)
                     dist[l] = dist[k]+1;
@@ -71,27 +60,16 @@ void calc_distances (int id)
 
 #ifdef DEBUG
     printf ("Dist from %d:\n", id);
-    for (i = 0; i < graph_size; i++)
+    for (i = 0; i < maze_size*maze_size; i++)
         printf ("%d: %d\n", i, dist[i]);
     printf ("\n");
 #endif
-}
 
-
-/* Check calculated distance that all targets are accessible */
-int check_dist ()
-{
-    int i;
-
-    if (dist[graph_rev[0]] == -1)
-        return 0;
-    if (dist[graph_rev[maze_size*maze_size-1]] == -1)
-        return 0;
-    
     for (i = 0; i < treas_count; i++)
-        if (dist[graph_rev[treas[i]]] == -1)
-            return 0;
-    return 1;
+        res[i] = dist[treas[i]];
+
+    entry_exit[0] = dist[0];
+    entry_exit[1] = dist[maze_size * maze_size - 1];
 }
 
 
@@ -183,8 +161,6 @@ int main(int argc, char *argv[])
             continue;
         }
 
-        graph_size = 0;
-
         /* build graph of the maze */
         for (i = 0; i < maze_size; i++) {
             for (j = 0; j < maze_size; j++) {
@@ -192,21 +168,15 @@ int main(int argc, char *argv[])
                 id = i*maze_size + j;
                 if (!maze[i][j]) {
                     if (i > 0 && maze[i-1][j] == 0)
-                        incidence[id][++t] = (i-1) * maze_size + j;
+                        incidence[id][t++] = (i-1) * maze_size + j;
                     if (j > 0 && maze[i][j-1] == 0)
-                        incidence[id][++t] = i * maze_size + j - 1;
+                        incidence[id][t++] = i * maze_size + j - 1;
                     if (i < maze_size-1 && maze[i+1][j] == 0)
-                        incidence[id][++t] = (i+1) * maze_size + j;
+                        incidence[id][t++] = (i+1) * maze_size + j;
                     if (j < maze_size-1 && maze[i][j+1] == 0)
-                        incidence[id][++t] = i * maze_size + j + 1;
+                        incidence[id][t++] = i * maze_size + j + 1;
                 }
-                incidence[id][0] = t;
-                if (t) {
-                    graph_rev[id] = graph_size;
-                    graph[graph_size++] = id;
-                }
-                else
-                    graph_rev[id] = -1;
+                incidence[id][t] = -1;
             }
         }
 
@@ -214,8 +184,8 @@ int main(int argc, char *argv[])
         for (i = 0; i < maze_size*maze_size; i++) {
             printf ("%d:", i);
 
-            for (j = 0; j < incidence[i][0]; j++)
-                printf ("%d ", incidence[i][j+1]);
+            for (j = 0; incidence[i][j] >= 0; j++)
+                printf ("%d ", incidence[i][j]);
             putchar ('\n');
         }
 
@@ -226,41 +196,15 @@ int main(int argc, char *argv[])
 #endif
 
         /* prepare distance matrix */
-        for (i = 0; i < treas_count+2; i++)
-            for (j = 0; j < treas_count+2; j++)
-                dist_matrix[i][j] = -1;
-            
-        /* find distance from entry to all treasures */
-        calc_distances (0);
-        if (!check_dist ()) {
-            printf ("-1\n");
-            continue;
-        }
-        save_dist (0);
-        if (graph_size > 0)
-            dist_matrix[0][treas_count+1] = dist_matrix[treas_count+1][0] = dist[graph_size-1];
-
-        /* find distance from any treasure to all other treasures */
-        flag = 0;
         for (i = 0; i < treas_count; i++) {
-            calc_distances (treas[i]);
-            if (!check_dist ()) {
-                printf ("-1\n");
-                flag = 1;
-                break;
-            }
-            save_dist (i+1);
+            for (j = 0; j < treas_count; j++)
+                dist_matrix[i][j] = -1;
+            entry_exit_dist[i][0] = entry_exit_dist[i][1] = -1;
         }
-        if (flag)
-            continue;
-
-        /* find distance from exit to all treasures */
-        calc_distances (maze_size * maze_size - 1);
-        if (!check_dist ()) {
-            printf ("-1\n");
-            continue;
-        }
-        save_dist (treas_count+1);
+            
+        /* find distance from any treasure to all other treasures plus entry and exit cell */
+        for (i = 0; i < treas_count; i++)
+            calc_distances (treas[i], dist_matrix[i], entry_exit_dist[i]);
 
         /* find optimal way to gather all treasures and exit */
 #ifdef DEBUG

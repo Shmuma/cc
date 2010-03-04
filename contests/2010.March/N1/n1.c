@@ -139,7 +139,10 @@ int main(int argc, char *argv[])
 #ifdef DEBUG
                     putchar ('*');
 #endif
-                    treas[treas_count++] = i*maze_size + j;
+                    treas[treas_count] = i*maze_size + j;
+                    if (treas[treas_count] != 0 &&
+                        treas[treas_count] != maze_size * maze_size - 1)
+                        treas_count++;
                     break;
                 case '#':
 #ifdef DEBUG

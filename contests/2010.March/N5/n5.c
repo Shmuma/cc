@@ -93,12 +93,10 @@ void move (int flagged)
     else
         pp = d;
 
+    memcpy (pp, p, sizeof (int) * size);
+
     for (i = 0; i < size; i++)
-        if (!flags[i]) {
-            pos[p[i]] = j;
-            pp[j++] = p[i];
-        }
-        else {
+        if (flags[i]) {
             pos[p[i]] = f;
             pp[f++] = p[i];
         }

@@ -59,10 +59,11 @@ int needs_moving (int n)
 }
 
 
-int mark_to_move (int n)
+int mark_to_move (int n, int *flagged)
 {
     int i, k;
 
+    *flagged = 1;
     memset (flags, 0, sizeof (unsigned char) * size);
     flags[n] = 1;
 
@@ -71,6 +72,7 @@ int mark_to_move (int n)
     for (i = n+1; i < size; i++)
         if (p[i] == k) {
             flags[i] = 1;
+            (*flagged)++;
             k++;
         }
 
@@ -78,9 +80,9 @@ int mark_to_move (int n)
 }
 
 
-void move ()
+void move (int flagged)
 {
-    int i, j = 0;
+    int i, j = 0, f = size - flagged;
     int *pp;
 
     if (p == d)
@@ -91,10 +93,8 @@ void move ()
     for (i = 0; i < size; i++)
         if (!flags[i])
             pp[j++] = p[i];
-
-    for (i = 0; i < size; i++)
-        if (flags[i])
-            pp[j++] = p[i];
+        else
+            pp[f++] = p[i];           
 
     p = pp;
 }
@@ -148,7 +148,7 @@ int simplify ()
 
 int solve ()
 {
-    int i, n, inc, res = 0, idx;
+    int i, n, inc, res = 0, idx, flagged;
 
     res += simplify ();
     order ();
@@ -157,8 +157,8 @@ int solve ()
     while (n < size) {
         idx = find_pos (n);
         if (needs_moving (idx)) {
-            inc = mark_to_move (idx);
-            move ();
+            inc = mark_to_move (idx, &flagged);
+            move (flagged);
             res++;
         }
         else

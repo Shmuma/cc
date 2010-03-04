@@ -82,8 +82,14 @@ void calc_distances (int id)
 int check_dist ()
 {
     int i;
-    for (i = 0; i < graph_size; i++)
-        if (dist[i] == -1)
+
+    if (dist[graph_rev[0]] == -1)
+        return 0;
+    if (dist[graph_rev[maze_size*maze_size-1]] == -1)
+        return 0;
+    
+    for (i = 0; i < treas_count; i++)
+        if (dist[graph_rev[treas[i]]] == -1)
             return 0;
     return 1;
 }
@@ -104,7 +110,7 @@ int find_min_way (int start, int route_length)
                 continue;
             if (i == start)
                 continue;
-            if (dist_matrix[start][i] < 0)
+            if (dist_matrix[start][i] <= 0)
                 continue;
 
             done[i] = 1;

@@ -10,7 +10,7 @@ int dd[100001];
 unsigned char flags[100001];
 
 int solve ();
-void simplify ();
+int simplify ();
 
 int compare (const void *a, const void *b)
 {
@@ -28,7 +28,6 @@ int main(int argc, char *argv[])
         
         for (i = 0; i < size; i++)
             scanf ("%d", &data[i][0]);
-        simplify ();
         printf ("%d\n", solve ());
     }
 
@@ -91,23 +90,10 @@ void move ()
 }
 
 
-void simplify ()
+/* Input is in data array, output is in d array */
+void order ()
 {
-    int i, idx;
-
-    for (i = 0; i < size; i++)
-        data[i][1] = i;
-
-    qsort (data, size, sizeof (data[0]), compare);
-
-    for (i = 0; i < size; i++)
-        dd[data[i][1]] = i;
-    idx = 1;
-    data[0][0] = dd[0];
-    for (i = 1; i < size; i++)
-        if (dd[i] != dd[i-1]+1)
-            data[idx++][0] = dd[i];
-    size = idx;
+    int i;
 
     for (i = 0; i < size; i++)
         data[i][1] = i;
@@ -119,9 +105,43 @@ void simplify ()
 }
 
 
+int simplify ()
+{
+    int i, idx, inc = 0;
+
+    order ();
+
+    /* pack inceasing elements */
+    idx = 1;
+    data[0][0] = d[0];
+    for (i = 1; i < size; i++)
+        if (d[i] != d[i-1]+1)
+            data[idx++][0] = d[i];
+    size = idx;
+
+    order ();
+
+    /* pack decreasing elements */
+    idx = 1;
+    inc = 0;
+    data[0][0] = d[0];
+    for (i = 1; i < size; i++)
+        if (d[i] != d[i-1]-1)
+            data[idx++][0] = d[i];
+        else
+            inc++;
+    size = idx;
+
+    return inc;
+}
+
+
 int solve ()
 {
     int i, n, inc, res = 0, idx;
+
+    res += simplify ();
+    order ();
     
     n = 0; 
     while (n < size) {

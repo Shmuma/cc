@@ -65,9 +65,9 @@ int mark_to_move (int n, int *flagged)
 {
     int i, k;
 
+    memset (flags, 0, (n+1) * sizeof (flags[0]));
     *flagged = 1;
     flags[n] = 1;
-
     k = p[n]+1;
 
     for (i = n+1; i < size; i++)

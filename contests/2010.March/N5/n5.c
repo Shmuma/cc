@@ -2,11 +2,14 @@
 #include <stdlib.h>
 #include <string.h>
 
+/* http://www.jerrydallal.com/random/random_permutation.htm */
+
 
 int size;
 int data[100001][2];
 int d[100001];
 int dd[100001];
+int *p = d;
 unsigned char flags[100001];
 
 int solve ();
@@ -39,7 +42,7 @@ int find_pos (int n)
 {
     int i;
     for (i = 0; i < size; i++)
-        if (d[i] == n)
+        if (p[i] == n)
             return i;
 }
 
@@ -49,7 +52,7 @@ int needs_moving (int n)
     int i;
 
     for (i = n+1; i < size; i++)
-        if (d[i] < d[n])
+        if (p[i] < p[n])
             return 1;
 
     return 0;
@@ -63,30 +66,37 @@ int mark_to_move (int n)
     memset (flags, 0, sizeof (unsigned char) * size);
     flags[n] = 1;
 
-    k = d[n]+1;
+    k = p[n]+1;
 
     for (i = n+1; i < size; i++)
-        if (d[i] == k) {
+        if (p[i] == k) {
             flags[i] = 1;
             k++;
         }
 
-    return k-d[n];
+    return k - p[n];
 }
 
 
 void move ()
 {
     int i, j = 0;
+    int *pp;
+
+    if (p == d)
+        pp = dd;
+    else
+        pp = d;
 
     for (i = 0; i < size; i++)
         if (!flags[i])
-            dd[j++] = d[i];
+            pp[j++] = p[i];
 
     for (i = 0; i < size; i++)
         if (flags[i])
-            dd[j++] = d[i];
-    memcpy (d, dd, sizeof (unsigned char) * size);
+            pp[j++] = p[i];
+
+    p = pp;
 }
 
 

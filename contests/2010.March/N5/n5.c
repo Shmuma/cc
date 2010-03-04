@@ -12,6 +12,8 @@ int dd[100001];
 int *p = d;
 unsigned char flags[100001];
 
+int pos[100001];
+
 int solve ();
 int simplify ();
 
@@ -64,7 +66,6 @@ int mark_to_move (int n, int *flagged)
     int i, k;
 
     *flagged = 1;
-    memset (flags, 0, sizeof (unsigned char) * size);
     flags[n] = 1;
 
     k = p[n]+1;
@@ -75,6 +76,8 @@ int mark_to_move (int n, int *flagged)
             (*flagged)++;
             k++;
         }
+        else
+            flags[i] = 0;
 
     return k - p[n];
 }
@@ -91,10 +94,14 @@ void move (int flagged)
         pp = d;
 
     for (i = 0; i < size; i++)
-        if (!flags[i])
+        if (!flags[i]) {
+            pos[p[i]] = j;
             pp[j++] = p[i];
-        else
-            pp[f++] = p[i];           
+        }
+        else {
+            pos[p[i]] = f;
+            pp[f++] = p[i];
+        }
 
     p = pp;
 }
@@ -110,8 +117,10 @@ void order ()
 
     qsort (data, size, sizeof (data[0]), compare);
 
-    for (i = 0; i < size; i++)
+    for (i = 0; i < size; i++) {
         d[data[i][1]] = i;
+        pos[i] = data[i][1];
+    }
 }
 
 
@@ -155,7 +164,7 @@ int solve ()
     
     n = 0; 
     while (n < size) {
-        idx = find_pos (n);
+        idx = pos[n];
         if (needs_moving (idx)) {
             inc = mark_to_move (idx, &flagged);
             move (flagged);

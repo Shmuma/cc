@@ -23,6 +23,7 @@ int done[200];
 int dist_matrix[20][20];
 
 
+
 void save_dist (int id)
 {
     int i;
@@ -77,6 +78,18 @@ void calc_distances (int id)
 }
 
 
+/* Check calculated distance that all targets are accessible */
+int check_dist ()
+{
+    int i;
+    for (i = 0; i < graph_size; i++)
+        if (dist[i] == -1)
+            return 0;
+    return 1;
+}
+
+
+
 /* routine recursively searches for minimal way, starting from given */
 int find_min_way (int start, int route_length)
 {
@@ -115,7 +128,7 @@ int find_min_way (int start, int route_length)
 
 int main(int argc, char *argv[])
 {
-    int n, i, j, id, t, k;
+    int n, i, j, id, t, k, flag;
 
     scanf ("%d", &n);
 
@@ -213,18 +226,34 @@ int main(int argc, char *argv[])
             
         /* find distance from entry to all treasures */
         calc_distances (0);
+        if (!check_dist ()) {
+            printf ("-1\n");
+            continue;
+        }
         save_dist (0);
         if (graph_size > 0)
             dist_matrix[0][treas_count+1] = dist_matrix[treas_count+1][0] = dist[graph_size-1];
 
         /* find distance from any treasure to all other treasures */
+        flag = 0;
         for (i = 0; i < treas_count; i++) {
             calc_distances (treas[i]);
+            if (!check_dist ()) {
+                printf ("-1\n");
+                flag = 1;
+                break;
+            }
             save_dist (i+1);
         }
+        if (flag)
+            continue;
 
         /* find distance from exit to all treasures */
         calc_distances (maze_size * maze_size - 1);
+        if (!check_dist ()) {
+            printf ("-1\n");
+            continue;
+        }
         save_dist (treas_count+1);
 
         /* find optimal way to gather all treasures and exit */

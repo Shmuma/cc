@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
+
 
 
 int main(int argc, char *argv[])
@@ -11,9 +13,10 @@ int main(int argc, char *argv[])
     while (n--) {
         scanf ("%d", &p);
         res = 0;
-        for (i = 1; i <= p; i++)
-            if (i % 10 == 0)
-                res++;
+        while (p > 0) {
+            p /= 5;
+            res += p;
+        }
 
         printf ("%d\n", res);
     }

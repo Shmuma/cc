@@ -65,15 +65,11 @@ void calc_distances (int id, int *res, int *entry_exit)
     printf ("\n");
 #endif
 
-    if (res) {
-        for (i = 0; i < treas_count; i++)
-            res[i] = dist[treas[i]];
-    }
+    for (i = 0; i < treas_count; i++)
+        res[i] = dist[treas[i]];
 
-    if (entry_exit) {
-        entry_exit[0] = dist[0];
-        entry_exit[1] = dist[maze_size * maze_size - 1];
-    }
+    entry_exit[0] = dist[0];
+    entry_exit[1] = dist[maze_size * maze_size - 1];
 }
 
 
@@ -159,35 +155,6 @@ int find_best_way ()
 }
 
 
-int is_exit (int i, int j)
-{
-    return (i == maze_size-1) && (j == maze_size-1);
-}
-
-
-
-void build_incidence (int i, int j, int filter_exit)
-{
-    int t, id;
-
-    t = 0;
-    id = i*maze_size + j;
-    if (!filter_exit || !is_exit (i, j)) {
-        if (!maze[i][j]) {
-            if (i > 0 && maze[i-1][j] == 0)
-                incidence[id][t++] = (i-1) * maze_size + j;
-            if (j > 0 && maze[i][j-1] == 0)
-                incidence[id][t++] = i * maze_size + j - 1;
-            if (i < maze_size-1 && maze[i+1][j] == 0 && (!filter_exit || !is_exit (i+1, j)))
-                incidence[id][t++] = (i+1) * maze_size + j;
-            if (j < maze_size-1 && maze[i][j+1] == 0 && (!filter_exit || !is_exit (i, j+1)))
-                incidence[id][t++] = i * maze_size + j + 1;
-        }
-    }
-    incidence[id][t] = -1;
-}
-
-
 
 int main(int argc, char *argv[])
 {
@@ -241,9 +208,23 @@ int main(int argc, char *argv[])
         }
 
         /* build graph of the maze */
-        for (i = 0; i < maze_size; i++)
-            for (j = 0; j < maze_size; j++)
-                build_incidence (i, j, 1);
+        for (i = 0; i < maze_size; i++) {
+            for (j = 0; j < maze_size; j++) {
+                t = 0;
+                id = i*maze_size + j;
+                if (!maze[i][j]) {
+                    if (i > 0 && maze[i-1][j] == 0)
+                        incidence[id][t++] = (i-1) * maze_size + j;
+                    if (j > 0 && maze[i][j-1] == 0)
+                        incidence[id][t++] = i * maze_size + j - 1;
+                    if (i < maze_size-1 && maze[i+1][j] == 0)
+                        incidence[id][t++] = (i+1) * maze_size + j;
+                    if (j < maze_size-1 && maze[i][j+1] == 0)
+                        incidence[id][t++] = i * maze_size + j + 1;
+                }
+                incidence[id][t] = -1;
+            }
+        }
 
 #ifdef DEBUG
         for (i = 0; i < maze_size*maze_size; i++) {
@@ -269,20 +250,12 @@ int main(int argc, char *argv[])
             
         /* find distance from any treasure to all other treasures plus entry and exit cell */
         for (i = 0; i < treas_count; i++)
-            calc_distances (treas[i], dist_matrix[i], NULL);
+            calc_distances (treas[i], dist_matrix[i], entry_exit_dist[i]);
 
         /* If there are no treasures, we must find way from start to finish */
         if (!treas_count)
             calc_distances (0, dist_matrix[0], entry_exit_dist[0]);
-        else {
-            /* Now we must calculate distance to exit, so, rebuild incidence */
-            /* build graph of the maze */
-            for (i = 0; i < maze_size; i++)
-                for (j = 0; j < maze_size; j++)
-                    build_incidence (i, j, 0);
-            for (i = 0; i < treas_count; i++)
-                calc_distances (treas[i], NULL, entry_exit_dist[i]);
-        }
+
 
         /* find optimal way to gather all treasures and exit */
 #ifdef DEBUG

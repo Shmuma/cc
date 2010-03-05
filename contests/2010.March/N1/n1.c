@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define DEBUG
+#define NDEBUG
 
 int maze_size;
 char maze[20][20];
@@ -49,7 +49,7 @@ void calc_distances (int id, int *res, int *entry_exit)
 
     while ((k = min_distance ()) >= 0) {
         for (i = 0; incidence[k][i] >= 0; i++) {
-            l = incidence[k][i+1];
+            l = incidence[k][i];
             if (!done[l]) {
                 if (dist[l] < 0 || dist[l] > dist[k]+1)
                     dist[l] = dist[k]+1;
@@ -73,41 +73,87 @@ void calc_distances (int id, int *res, int *entry_exit)
 }
 
 
+void indent (int count)
+{
+    int i;
+
+    for (i = 0; i < count; i++) {
+        putchar (' ');
+        putchar (' ');
+    }
+}
+
 
 /* routine recursively searches for minimal way, starting from given */
 int find_min_way (int start, int route_length)
 {
-    int i, dist, min_dist = -1;
+    int i, dist, min_dist = -1, t;
 
-    if (route_length == treas_count+1) {
-        return dist_matrix[start][treas_count+1];
+    if (route_length <= 1) {
+        return entry_exit_dist[start][1];
     }
     else {
-        for (i = 0; i < treas_count+1; i++) {
+        done[start] = 1;
+        for (i = 0; i < treas_count; i++) {
             if (done[i])
                 continue;
-            if (i == start)
-                continue;
-            if (dist_matrix[start][i] <= 0)
+            if (dist_matrix[start][i] < 0)
                 continue;
 
             done[i] = 1;
 #ifdef DEBUG
+            indent (treas_count - route_length);
             printf ("%d -> %d (%d)\n", start, i, dist_matrix[start][i]);
 #endif
-            dist = find_min_way (i, route_length+1);
+            dist = find_min_way (i, route_length-1);
             done[i] = 0;
             if (dist > 0) {
                 dist += dist_matrix[start][i];
         
-                if (min_dist < 0 || dist < min_dist)
+                if (min_dist < 0 || dist < min_dist) {
                     min_dist = dist;
+#ifdef DEBUG
+                    indent (treas_count - route_length);
+                    printf ("Best so far: %d\n", dist);
+#endif
+                }
             }
         }
+        done[start] = 0;
     }
 
+#ifdef DEBUG
+    indent (treas_count - route_length);
+    printf ("%d\n", min_dist);
+#endif
     return min_dist;
 }
+
+
+
+int find_best_way ()
+{
+    int i, end, res, best = -1, best_id;
+
+    for (i = 0; i < treas_count; i++) {
+        if (entry_exit_dist[i][0] < 0)
+            return -1;
+        res = find_min_way (i, treas_count);
+        if (res < 0)
+            return -1;
+
+        res += entry_exit_dist[i][0];
+        if (best < 0 || best > res) {
+            best = res;
+            best_id = i;
+        }
+    }
+#ifdef DEBUG
+    printf ("Best ID = %d\n", best_id);
+#endif
+    return best;
+}
+
 
 
 int main(int argc, char *argv[])
@@ -206,24 +252,30 @@ int main(int argc, char *argv[])
         for (i = 0; i < treas_count; i++)
             calc_distances (treas[i], dist_matrix[i], entry_exit_dist[i]);
 
+        /* If there are no treasures, we must find way from start to finish */
+        if (!treas_count)
+            calc_distances (0, dist_matrix[0], entry_exit_dist[0]);
+
+
         /* find optimal way to gather all treasures and exit */
 #ifdef DEBUG
         putchar ('\n');
-        for (i = 0; i < treas_count+2; i++) {
+        for (i = 0; i < treas_count; i++) {
             printf ("%d: ", i);
 
-            for (j = 0; j < treas_count+2; j++)
+            for (j = 0; j < treas_count; j++)
                 printf ("%2d ", dist_matrix[i][j]);
+
+            printf ("Entry: %d, Exit: %d", entry_exit_dist[i][0], entry_exit_dist[i][1]);
             putchar ('\n');
         }
 #endif
 
         if (!treas_count)
-            printf ("%d\n", dist_matrix[0][1]);
+            printf ("%d\n", entry_exit_dist[0][1]);
         else {
-            memset (done, 0, (treas_count+2)*sizeof (done[0]));
-            done[0] = 1;
-            t = find_min_way (0, 1);
+            memset (done, 0, treas_count * sizeof (done[0]));
+            t = find_best_way ();
             printf ("%d\n", t);
         }
     }

@@ -73,6 +73,7 @@ void calc_distances (int id, int *res, int *entry_exit)
 }
 
 
+#ifdef DEBUG
 void indent (int count)
 {
     int i;
@@ -82,6 +83,7 @@ void indent (int count)
         putchar (' ');
     }
 }
+#endif
 
 
 /* routine recursively searches for minimal way, starting from given */

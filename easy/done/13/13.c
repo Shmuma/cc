@@ -24,9 +24,19 @@ void show (int n)
         if ((1 << bit) & n) {
             if (!flag)
                 putchar ('+');
-            printf ("2(");
-            show (bit);
-            printf (")");
+            switch (bit) {
+            case 0:
+                printf ("2(0)");
+                break;
+            case 1:
+                printf ("2");
+                break;
+            default:
+                printf ("2(");
+                show (bit);
+                printf (")");
+                break;
+            }
             flag = 0;
             n ^= 1 << bit;
         }
@@ -40,7 +50,9 @@ int main(int argc, char *argv[])
     int n;
 
     while (1) {
-        scanf ("%d", &n);
+        if (scanf ("%d", &n) <= 0)
+            break;
+        printf ("%d=", n);
         show (n);
         putchar ('\n');
     }

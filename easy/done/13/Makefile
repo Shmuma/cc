@@ -5,4 +5,5 @@ clean:
 	rm -f test
 
 run: test
-	./test
+	./test < in.txt > out.txt
+	cat out.txt

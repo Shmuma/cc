@@ -6,11 +6,6 @@
 #define DEBUG 0
 
 
-static char buf[32*1024];
-static int count, pos;
-static int eof;
-
-
 int next (int stalks, int leaves)
 {
     if (leaves > stalks)
@@ -21,54 +16,23 @@ int next (int stalks, int leaves)
 }
 
 
-void fetch ()
-{
-    int ret;
-
-    count -= pos;
-    if (count > 0 && pos > 0)
-        memmove (buf, buf+pos, count);
-    pos = 0;
-    ret = read (0, buf+count, sizeof (buf)-count);
-    if (ret < 0)
-        return;
-    count += ret;
-    eof = count == 0;
-}
-
-
-void skip_spaces ()
-{
-    while (pos < count && isspace (buf[pos]))
-        pos++;
-}
-
-
 int getnum ()
 {
-    int res = 0;
+    int c;
+    int n = 0;
 
     do {
-        if (count == pos)
-            fetch ();
-        skip_spaces ();
-        if (eof)
-            return 0;
+        c = getchar_unlocked ();
     }
-    while (count == pos);
+    while (c < '0' || c > '9');
 
-    while (isdigit (buf[pos])) {
-        res *= 10;
-        res += buf[pos] - '0';
-        pos++;
-        if (pos == count) {
-            fetch ();
-            if (pos == count)
-                break;
-        }
+    do {
+        n = (n << 3) + (n << 1) + c-'0';
+        c = getchar_unlocked ();
     }
+    while (c >= '0' && c <= '9');
 
-    return res;
+    return n;
 }
 
 
@@ -78,7 +42,6 @@ int main(int argc, char *argv[])
     int res;
     int stalks;
 
-    pos = count = 0;
     n = getnum ();
     
     while (n--) {

@@ -23,6 +23,13 @@ int search (int from, int to, int val)
 {
     int i, o_from = from;
 
+    if (from == to) {
+        if (sticks[from] < val)
+            return 1;
+        else
+            return 0;
+    }
+
     do {
         i = (from+to) >> 1;
         if (sticks[i] == val)
@@ -34,7 +41,10 @@ int search (int from, int to, int val)
     }
     while (from < to);
 
-    return i+1-o_from;
+    if (sticks[i] < val)
+        return i+2-o_from;
+    else
+        return i+1-o_from;
 }
 
 
@@ -50,7 +60,10 @@ int solve ()
         j = 0;
 
         while (j < i) {
-            res += search (j+1, i-1, sticks[i]-sticks[j]);
+            if (j == 0 || sticks[j] != sticks[j-1]) {
+                if (j+1 <= i-1)
+                    res += search (j+1, i-1, sticks[i]-sticks[j]);
+            }
             j++;
         }
         i--;

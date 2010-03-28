@@ -1,6 +1,6 @@
 #+STARTUP: fold
 
-* easy [43%]
+* easy [45%]
 1. [X] TEST
 2. [X] FCTRL
 3. [X] HS08TEST
@@ -23,7 +23,7 @@
 20. [X] D1
 21. [ ] NOTATRI
 22. [X] RESN04
-23. [ ] E1
+23. [X] E1
 24. [ ] INSOMB1
 25. [ ] NUKES
 26. [ ] J7

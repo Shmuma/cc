@@ -8,7 +8,8 @@ int main(int argc, char *argv[])
 {
     unsigned long long n, p, i, res;
 
-    scanf ("%llu", &n);
+    if (scanf ("%llu", &n) <= 0)
+        return 0;
 
     while (n--) {
         scanf ("%llu", &p);

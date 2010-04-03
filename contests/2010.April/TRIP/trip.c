@@ -13,7 +13,7 @@ void solve (int pos, int rest)
     int a, b, d;
     int v1, v2;
 
-    printf ("solve: %d, %d\n", pos, rest);
+    //    printf ("solve: %d, %d\n", pos, rest);
 
     if (pos == n-1)
         return;

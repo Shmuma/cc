@@ -1,9 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <map>
+#include <utility>
 
+using namespace std;
 
 int n, vol;
-int dists[1000000];
+int dists[1000001];
+
+typedef map< pair<int,int>, pair<int, int> > cache_t;
+
+cache_t cache;
 
 
 void solve (int pos, int rest, int* stops, int* vars)
@@ -11,13 +18,19 @@ void solve (int pos, int rest, int* stops, int* vars)
     int a, b, d;
     int v1, v2;
 
-    printf ("solve: %d, %d\n", pos, rest);
-
     if (pos == n-1) {
         *stops = 0;
         *vars = 1;
         return;
     }
+    cache_t::const_iterator it = cache.find (pair<int,int> (pos, rest));
+
+    if (it != cache.end ()) {
+        *stops = it->second.first;
+        *vars = it->second.second;
+        return;
+    }
+
     d = dists[pos+1] - dists[pos];
 
     if (d <= rest) {
@@ -41,6 +54,7 @@ void solve (int pos, int rest, int* stops, int* vars)
 
     *stops = a;
     *vars = v1;
+    cache[pair<int,int> (pos, rest)] = pair<int, int> (a, v1);
 }
 
 

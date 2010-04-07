@@ -21,7 +21,7 @@ void solve (int* stops, int* vars)
     inner_t::iterator it;
 
     // build table
-    printf ("%d: %d <- %d\n", n-1, 0, 0);
+//    printf ("%d: %d <- %d\n", n-1, 0, 0);
     table[n-1][0] = 0;
     for (i = n-2; i >= 0; i--) {
         it = table[i+1].begin ();
@@ -37,14 +37,18 @@ void solve (int* stops, int* vars)
                 d -= vol;
                 c++;
             }
-            printf ("%d: %d <- %d\n", i, d, c);
+            else {
+//                printf ("%d: %d <- %d\n", i, d-1, c+1);
+//                table[i][d-1] = c+1;
+            }
+//            printf ("%d: %d <- %d\n", i, d, c);
             table[i][d] = c;
             it++;
         }
     }
 
-    it = table[0].begin ();
     m = it->second;
+    it = table[0].begin ();
     while (it != table[0].end ()) {
         if (it->second < m)
             m = it->second;
@@ -53,6 +57,13 @@ void solve (int* stops, int* vars)
 
     *stops = m;
     *vars = 0;
+
+    it = table[0].begin ();
+    while (it != table[0].end ()) {
+        if (it->second == m)
+            (*vars)++;
+        it++;
+    }
 }
 
 

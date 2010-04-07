@@ -2,72 +2,74 @@
 #include <stdlib.h>
 #include <map>
 #include <utility>
+#include <vector>
+
 
 using namespace std;
 
 int n, vol;
-int dists[1000001];
+vector<int> dists;
 
-typedef map< pair<int,int>, pair<int, int> > cache_t;
+typedef map<int, int> inner_t ;
 
-cache_t cache;
+map<int, inner_t> table;
 
 
-void solve (int pos, int rest, int* stops, int* vars)
+void solve (int* stops, int* vars)
 {
-    int a, b, d;
-    int v1, v2;
+    int i, m;
+    inner_t::iterator it;
 
-    if (pos == n-1) {
-        *stops = 0;
-        *vars = 1;
-        return;
-    }
-    cache_t::const_iterator it = cache.find (pair<int,int> (pos, rest));
+    // build table
+    printf ("%d: %d <- %d\n", n-1, 0, 0);
+    table[n-1][0] = 0;
+    for (i = n-2; i >= 0; i--) {
+        it = table[i+1].begin ();
 
-    if (it != cache.end ()) {
-        *stops = it->second.first;
-        *vars = it->second.second;
-        return;
-    }
+        while (it != table[i+1].end ()) {
+            int d, c;
 
-    d = dists[pos+1] - dists[pos];
+            d = it->first;
+            c = it->second;
 
-    if (d <= rest) {
-        solve (pos+1, rest - d, &a, &v1);
-        solve (pos+1, vol - d, &b, &v2);
-
-        b++;
-        if (a > b) {
-            v1 = v2;
-            a = b;
-        }
-        else {
-            if (a == b)
-                v1++;
+            d += dists[i];
+            if (d > vol) {
+                d -= vol;
+                c++;
+            }
+            printf ("%d: %d <- %d\n", i, d, c);
+            table[i][d] = c;
+            it++;
         }
     }
-    else {
-        solve (pos+1, vol - d, &a, &v1);
-        a++;
+
+    it = table[0].begin ();
+    m = it->second;
+    while (it != table[0].end ()) {
+        if (it->second < m)
+            m = it->second;
+        it++;
     }
 
-    *stops = a;
-    *vars = v1;
-    cache[pair<int,int> (pos, rest)] = pair<int, int> (a, v1);
+    *stops = m;
+    *vars = 0;
 }
 
 
 int main(int argc, char *argv[])
 {
-    int i, stops, vars;
+    int i, stops, vars, v, vv;
 
     scanf ("%d %d", &n, &vol);
-    
-    for (i = 0; i < n; i++)
-        scanf ("%d", dists+i);
+    scanf ("%d", &v);
 
-    solve (0, vol, &stops, &vars);
+    for (i = 1; i < n; i++) {
+        scanf ("%d", &vv);
+        dists.push_back (vv-v);
+        v = vv;
+    }
+
+    solve (&stops, &vars);
     printf ("%d %d\n", stops, vars);
 
     return 0;

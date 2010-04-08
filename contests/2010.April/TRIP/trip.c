@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
         d = val-prev;
         prev = val;
 
-        if (c_vol < d) {
+        if (c_vol <= d && i != n-1) {
             stops++;
             stops %= 1000000007;
             c_vol = vol;
@@ -33,6 +33,7 @@ int main(int argc, char *argv[])
         }
         c_vol -= d;
     }
+
 
     printf ("%d %d\n", stops, vars);
 

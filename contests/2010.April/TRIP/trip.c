@@ -24,6 +24,7 @@ int main(int argc, char *argv[])
 
         if (c_vol < d) {
             stops++;
+            stops %= 1000000007;
             c_vol = vol;
         }
         else {

@@ -3,7 +3,8 @@
 
 
 int n, vol;
-int deltas[1000000];
+int deltas[1000001];
+
 
 int main(int argc, char *argv[])
 {
@@ -43,6 +44,19 @@ int main(int argc, char *argv[])
         c_vol -= deltas[i-1];
     }
 
+    if (c_vol > 0) {
+        int d = c_vol;
+
+        /* step back to find amount of ways to plan */
+        for (j = n-2; j >= 0; j++) {
+            if (c_vol > 0) {
+                c_vol -= deltas[j];
+                vars++;
+                vars %= 1000000007;
+                break;
+            }
+        }
+    }
 
     printf ("%d %d\n", stops, vars);
 

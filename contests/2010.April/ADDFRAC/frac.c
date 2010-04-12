@@ -39,24 +39,23 @@ unsigned long long gcd (unsigned long long a, unsigned long long b)
 void solve_dp (unsigned long long n)
 {
     int i;
-    unsigned long long g;
+    unsigned long long g, a, b;
 
     dp[n-1][0] = frac[n-1][0];
     dp[n-1][1] = frac[n-1][1];
 
     for (i = n-2; i >= 0; i--) {
-        if (gt (dp[i+1][0] + frac[i][0], dp[i+1][1] + frac[i][1], frac[i][0], frac[i][1])) {
-            dp[i][0] = dp[i+1][0] + frac[i][0];
-            dp[i][1] = dp[i+1][1] + frac[i][1];
+        a = dp[i+1][0] + frac[i][0];
+        b = dp[i+1][1] + frac[i][1];
+        
+        if (gt (a, b, frac[i][0], frac[i][1])) {
+            dp[i][0] = a;
+            dp[i][1] = b;
         }
         else {
             dp[i][0] = frac[i][0];
             dp[i][1] = frac[i][1];           
         }
-
-        /* g = gcd (dp[i][0], dp[i][1]); */
-        /* dp[i][0] /= g; */
-        /* dp[i][1] /= g; */
     }
 
     for (i = 0; i < n; i++) {
@@ -78,13 +77,11 @@ int main(int argc, char *argv[])
             getchar ();
             scanf ("%llu", &frac[i][1]);
             getchar ();
-            /* g = gcd (frac[i][0], frac[i][1]); */
-            /* frac[i][0] /= g; */
-            /* frac[i][1] /= g; */
         }
 
         solve_dp (n);
-        putchar ('\n');
+        if (t > 0)
+            putchar ('\n');
     }
     return 0;
 }

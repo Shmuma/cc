@@ -72,7 +72,8 @@ int main(int argc, char *argv[])
         }
 
         solve (n);
-        putchar ('\n');
+        if (t > 0)
+            putchar ('\n');
     }
     return 0;
 }

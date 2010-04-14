@@ -9,7 +9,8 @@ int main(int argc, char *argv[])
 {
     int t;
     int x, y, z;
-    int i, j, k, l;
+    int i, j, k;
+    int a, b;
 
     scanf ("%d", &t);
 
@@ -31,12 +32,10 @@ int main(int argc, char *argv[])
 
                     if (k > 0)
                         v -= dat[i][j][k-1];
-                    if (j > 0)
-                        for (l = j-1; l >= 0; l--)
-                            v -= res[i][l][k];
-                    if (i > 0)
-                        for (l = i-1; l >= 0; l--)
-                            v -= res[t][l][k];
+                    for (a = 0; a <= i; a++)
+                        for (b = 0; b <= j; b++)
+                            if (a != i || b != j)
+                                v -= res[a][b][k];
                     res[i][j][k] = v;
                 }
             }

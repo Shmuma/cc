@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
     int t;
     int x, y, z;
     int i, j, k;
-    int a, b;
+    int a, b, c;
 
     scanf ("%d", &t);
 
@@ -28,15 +28,36 @@ int main(int argc, char *argv[])
         for (i = 0; i < x; i++) {
             for (j = 0; j < y; j++) {
                 for (k = 0; k < z; k++) {
-                    unsigned long long v = dat[i][j][k];
-
+                    a = dat[i][j][k];
                     if (k > 0)
-                        v -= dat[i][j][k-1];
-                    for (a = 0; a <= i; a++)
-                        for (b = 0; b <= j; b++)
-                            if (a != i || b != j)
-                                v -= res[a][b][k];
-                    res[i][j][k] = v;
+                        a -= dat[i][j][k-1];
+
+                    c = 0;
+                    if (i > 0 && j > 0) {
+                        c = dat[i-1][j-1][k];
+                        if (k > 0)
+                            c -= dat[i-1][j-1][k-1];
+                    }
+                    a -= c;
+
+                    b = 0;
+                    if (i > 0) {
+                        b = dat[i-1][j][k];
+                        if (k > 0)
+                            b -= dat[i-1][j][k-1];
+                        b -= c;
+                    }
+                    a -= b;
+
+                    b = 0;
+                    if (j > 0) {
+                        b = dat[i][j-1][k];
+                        if (k > 0)
+                            b -= dat[i][j-1][k-1];
+                        b -= c;
+                    }
+                    a -= b;
+                    res[i][j][k] = a;
                 }
             }
         }

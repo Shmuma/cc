@@ -1,6 +1,6 @@
 #+STARTUP: fold
 
-* easy [56%]
+* easy [58%]
 1. [X] TEST
 2. [X] FCTRL
 3. [X] HS08TEST
@@ -29,7 +29,7 @@
 26. [X] J7
 27. [X] CUBESUM
 28. [X] D6
-29. [ ] DCE03
+29. [X] DCE03
 30. [ ] INSOMA2
 31. [ ] PRPALIN
 32. [ ] SNCK04

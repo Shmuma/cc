@@ -20,12 +20,21 @@ int compare (const void *a, const void *b)
  */
 int search (int from, int to, int val)
 {
-    while (from <= to)
-        if (sticks[from] >= val)
-            return from;
+    int idx = to;
+
+    while (from < to) {
+        idx = (from + to) >> 1;
+
+        if (sticks[idx] > val)
+            to = idx-1;
         else
-            from++;
-    return to+1;
+            from = idx+1;
+    }
+
+    if (sticks[idx] >= val)
+        return idx;
+    else
+        return idx+1;
 }
 
 

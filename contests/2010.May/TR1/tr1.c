@@ -4,42 +4,49 @@
 #include <signal.h>
 
 
-int cities;
-int* inc; /* incidence matrix */
-int inc_len[20000];
-int p[20000];
+struct stack {
+    int count, size;
+    int* data;
+};
 
+
+int cities;
+struct stack *inc; /* incidence matrix */
+unsigned long long p[20000];
+
+
+void push (struct stack *s, int val)
+{
+    if (s->count == s->size) {
+        s->size += 16;
+        s->data = realloc (s->data, s->size * sizeof (int));
+    }
+
+    s->data[s->count++] = val;
+}
 
 
 void set_inc (int a, int b)
 {
-/*     printf ("set %d, %d\n", a, b); */
-/*     printf ("%d <= %d\n", a * cities + inc_len[a], b); */
-/*     printf ("%d <= %d\n", b * cities + inc_len[b], a); */
-
-    inc[a * cities + inc_len[a]++] = b;
-    inc[b * cities + inc_len[b]++] = a;
+    push (&inc[a], b);
+    push (&inc[b], a);
 }
 
 
 int get_inc (int n, int i)
 {
-    if (i < 0 || i >= inc_len[n]) {
-/*         printf ("%d.%d => -1\n", n, i); */
+    if (i < 0 || i >= inc[n].count)
         return -1;
-    }
-
-/*     printf ("%d.%d => %d\n", n, i, inc[n * cities + i]); */
-    return inc[n * cities + i];
+    return inc[n].data[i];
 }
 
 
 void reset_inc (int n, int i)
 {
-    if (i < 0 || i >= inc_len[n])
+    if (i < 0 || i >= inc[n].count)
         return;
 
-    inc[n * cities + i] = -1;
+    inc[n].data[i] = -1;
 }
 
 
@@ -48,12 +55,12 @@ int calc_p (int n, int parent)
 {
     int i, res = 0, t;
 
-    if (inc_len[n] == 1) {
+    if (inc[n].count == 1) {
         reset_inc (n, 0);
         return 0;
     }
 
-    for (i = 0; i < inc_len[n]; i++) {
+    for (i = 0; i < inc[n].count; i++) {
         t = get_inc (n, i);
         if (t >= 0) {
             if (t != parent)
@@ -73,10 +80,10 @@ unsigned long long calc_im (int n)
     unsigned long long res = 1 + 2 * p[n];
     int i, t;
 
-    for (i = 0; i < inc_len[n]; i++) {
+    for (i = 0; i < inc[n].count; i++) {
         t = get_inc (n, i);
         if (t >= 0)
-            res += (p[t]+1) * (p[n] - p[t] - 1);
+            res += (p[t]+1) * (p[n]-p[t]-1);
     }
 
     return res;
@@ -86,18 +93,15 @@ unsigned long long calc_im (int n)
 
 int main(int argc, char *argv[])
 {
-    int t, i;
+    int t;
     int a, b;
-    unsigned long long res;
+    unsigned long long res, i;
 
     scanf ("%d", &t);
     while (t--) {
         scanf ("%d", &cities);
         memset (p, 0, sizeof (p));
-        memset (inc_len, 0, sizeof (inc_len));
-        inc = (int*)calloc (cities * cities, sizeof (int));
-        if (!inc)
-            kill (0, SIGKILL);
+        inc = calloc (cities, sizeof (struct stack));
 
         for (i = 0; i < cities-1; i++) {
             scanf ("%d %d", &a, &b);
@@ -107,12 +111,13 @@ int main(int argc, char *argv[])
         calc_p (0, 0);
 
         res = 0;
-        for (i = 0; i < cities; i++) {
-            res += (i+1) * calc_im (i);
-            res %= 1000000007;
-        }
+        for (i = 0; i < cities; i++)
+            res += (i+1)*calc_im (i);
 
-        printf ("%llu\n", res);
+        printf ("%llu\n", res % 1000000007);
+        for (i = 0; i < cities; i++)
+            if (inc[i].count)
+                free (inc[i].data);
         free (inc);
     }
 

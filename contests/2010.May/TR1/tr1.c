@@ -55,7 +55,7 @@ int calc_p (int n, int parent)
 {
     int i, res = 0, t;
 
-    if (inc[n].count == 1) {
+    if (inc[n].count == 1 && n != parent) {
         reset_inc (n, 0);
         return 0;
     }
@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
 {
     int t;
     int a, b;
-    unsigned long long res, i;
+    unsigned long long res, i, im;
 
     scanf ("%d", &t);
     while (t--) {
@@ -111,8 +111,11 @@ int main(int argc, char *argv[])
         calc_p (0, 0);
 
         res = 0;
-        for (i = 0; i < cities; i++)
-            res += (i+1)*calc_im (i);
+        for (i = 0; i < cities; i++) {
+            im = calc_im (i);
+/*             printf ("Im[%llu] = %llu\n", i+1, im); */
+            res += (i+1)*im;
+        }
 
         printf ("%llu\n", res % 1000000007);
         for (i = 0; i < cities; i++)

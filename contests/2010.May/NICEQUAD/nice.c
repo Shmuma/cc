@@ -1,6 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/*
+ * There are 4 kinds of points:
+ * 0 - even x, even y
+ * 1 - even x, odd y
+ * 2 - odd x, even y
+ * 3 - odd x, odd y
+ */
+
+unsigned char oddity[4][4][4];
+unsigned int cnt_a[4], cnt_b[4], cnt_c[4], cnt_d[4];
 
 void count (int n, int* even, int* neven)
 {
@@ -9,7 +19,6 @@ void count (int n, int* even, int* neven)
     else
         (*even)++;
 }
-
 
 
 int min (int a, int b)
@@ -21,144 +30,100 @@ int min (int a, int b)
 }
 
 
-int diff_even (int even1, int neven1, int even2, int neven2)
+inline int abs (int v)
 {
-    return even1*even2 + neven1*neven2;
+    return v < 0 ? -v : v;
 }
 
 
-int diff_neven (int even1, int neven1, int even2, int neven2)
+void get_pt_by_kind (int kind, int* x, int* y)
 {
-    return even1*neven2 + neven1*even2;
+    switch (kind) {
+    case 0:
+        *x = 2;
+        *y = 2;
+        break;
+    case 1:
+        *x = 2;
+        *y = 1;
+        break;
+    case 2:
+        *x = 1;
+        *y = 2;
+        break;
+    case 3:
+        *x = 1;
+        *y = 1;
+        break;
+    }
 }
 
 
-int mul_even (int even1, int neven1, int even2, int neven2)
+int is_area_odd (int xa, int ya, int xb, int yb, int xc, int yc)
 {
-    return (even1 + neven1) * (even2 + neven2) - neven1 * neven2;
+    int area = (xa - xc)*(ya - yb) - (xa - xb)*(ya - yc);
+
+    return abs (area) % 2;
 }
 
 
-int mul_neven (int even1, int neven1, int even2, int neven2)
+int get_pt_kind (int x, int y)
 {
-    return neven1 * neven2;
+    x = abs (x);
+    y = abs (y);
+    
+    if (x % 2)
+        if (y % 2)
+            return 3;
+        else
+            return 2;
+    else
+        if (y % 2)
+            return 1;
+        else
+            return 0;
 }
-
 
 
 int main(int argc, char *argv[])
 {
-    int t, n, i, x, y;
+    int t, n, i, j, k, x, y;
     int res;
 
-    int eax, eay, nax, nay;
-    int ebx, eby, nbx, nby;
-    int ecx, ecy, ncx, ncy;
-    int edx, edy, ndx, ndy;
-    int v[10];
-    int area1_even, area1_neven;
-    int area2_even, area2_neven;
+    int xa, ya, xb, yb, xc, yc;
+
+    /* generate oddity table */
+    for (i = 0; i < 4; i++)
+        for (j = 0; j < 4; j++)
+            for (k = 0; k < 4; k++) {
+                get_pt_by_kind (i, &xa, &ya);
+                get_pt_by_kind (j, &xb, &yb);
+                get_pt_by_kind (k, &xc, &yc);
+        
+                oddity[i][j][k] = is_area_odd (xa, ya, xb, yb, xc, yc);
+            }
 
     scanf ("%d", &t);
     
     while (t--) {
         scanf ("%d", &n);
-        eax = eay = nax = nay = 0;
-        ebx = eby = nbx = nby = 0;
-        ecx = ecy = ncx = ncy = 0;
-        edx = edy = ndx = ndy = 0;
+
+        for (i = 0; i < 4; i++)
+            cnt_a[i] = cnt_b[i] = cnt_c[i] = cnt_d[i] = 0;
 
         for (i = 0; i < n; i++) {
             scanf ("%d %d", &x, &y);
             if (x == 0 || y == 0)
                 continue;
-            if (x > 0 && y > 0) {
-                count (x, &eax, &nax);
-                count (y, &eay, &nay);
-            }
-            if (x > 0 && y < 0) {
-                count (x, &ebx, &nbx);
-                count (y, &eby, &nby);
-            }
-            if (x < 0 && y < 0) {
-                count (x, &ecx, &ncx);
-                count (y, &ecy, &ncy);
-            }
-            if (x < 0 && y > 0) {
-                count (x, &edx, &ndx);
-                count (y, &edy, &ndy);
-            }
+            if (x > 0 && y > 0)
+                cnt_a[get_pt_kind (x, y)]++;
+            if (x > 0 && y < 0)
+                cnt_b[get_pt_kind (x, y)]++;
+            if (x < 0 && y < 0)
+                cnt_c[get_pt_kind (x, y)]++;
+            if (x < 0 && y > 0)
+                cnt_d[get_pt_kind (x, y)]++;
         }
-
-        printf ("eax = %d, eay = %d, nax = %d, nay = %d\n", eax, eay, nax, nay);
-        printf ("ebx = %d, eby = %d, nbx = %d, nby = %d\n", ebx, eby, nbx, nby);
-        printf ("ecx = %d, ecy = %d, ncx = %d, ncy = %d\n", ecx, ecy, ncx, ncy);
-        printf ("edx = %d, edy = %d, ndx = %d, ndy = %d\n", edx, edy, ndx, ndy);
-        printf ("\n");
-
-        v[0] = diff_even  (eax, nax, ecx, ncx);
-        v[1] = diff_neven (eax, nax, ecx, ncx);
-        printf ("X A-C: even: %d, neven: %d\n", v[0], v[1]);
-        v[2] = diff_even  (eay, nay, eby, nby);
-        v[3] = diff_neven (eay, nay, eby, nby);
-        printf ("Y A-B: even: %d, neven: %d\n", v[2], v[3]);
-
-        v[4] = mul_even  (v[0], v[1], v[2], v[3]);
-        v[5] = mul_neven (v[0], v[1], v[2], v[3]);
-        printf ("Mul1: even: %d, neven: %d\n\n", v[4], v[5]);
-
-        v[10] = diff_even  (eax, nax, ebx, nbx);
-        v[11] = diff_neven (eax, nax, ebx, nbx);
-        printf ("X A-B: even: %d, neven: %d\n", v[10], v[11]);
-        v[12] = diff_even  (eay, nay, ecy, ncy);
-        v[13] = diff_neven (eay, nay, ecy, ncy);
-        printf ("Y A-C: even: %d, neven: %d\n", v[12], v[13]);
-
-        v[14] = mul_even  (v[10], v[11], v[12], v[13]);
-        v[15] = mul_neven (v[10], v[11], v[12], v[13]);
-        printf ("Mul2: even: %d, neven: %d\n\n", v[14], v[15]);
-
-        area1_even  = diff_even  (v[4], v[5], v[14], v[15]);
-        area1_neven = diff_neven (v[4], v[5], v[14], v[15]);
-        printf ("Area1: even: %d, neven: %d\n\n", area1_even, area1_neven);
-
-        continue;
-
-        res = 0;
-        v[0] = diff_neven (mul_even  (diff_even  (eax, nax, ecx, ncx),
-                                      diff_neven (eax, nax, ecx, ncx),
-                                      diff_even  (eay, nay, ecy, ncy),
-                                      diff_neven (eay, nay, ecy, ncy)),
-                           mul_neven (diff_even  (eax, nax, ecx, ncx),
-                                      diff_neven (eax, nax, ecx, ncx),
-                                      diff_even  (eay, nay, ecy, ncy),
-                                      diff_neven (eay, nay, ecy, ncy)),
-                           mul_even  (diff_even  (eax, nax, ebx, nbx),
-                                      diff_neven (eax, nax, ebx, nbx),
-                                      diff_even  (eay, nay, eby, nby),
-                                      diff_neven (eay, nay, eby, nby)),
-                           mul_neven (diff_even  (eax, nax, ebx, nbx),
-                                      diff_neven (eax, nax, ebx, nbx),
-                                      diff_even  (eay, nay, eby, nby),
-                                      diff_neven (eay, nay, eby, nby)));
-        v[1] = diff_neven (mul_even  (diff_even  (eax, nax, ecx, ncx),
-                                      diff_neven (eax, nax, ecx, ncx),
-                                      diff_even  (eay, nay, ecy, ncy),
-                                      diff_neven (eay, nay, ecy, ncy)),
-                           mul_neven (diff_even  (eax, nax, ecx, ncx),
-                                      diff_neven (eax, nax, ecx, ncx),
-                                      diff_even  (eay, nay, ecy, ncy),
-                                      diff_neven (eay, nay, ecy, ncy)),
-                           mul_even  (diff_even  (eax, nax, edx, ndx),
-                                      diff_neven (eax, nax, edx, ndx),
-                                      diff_even  (eay, nay, edy, ndy),
-                                      diff_neven (eay, nay, edy, ndy)),
-                           mul_neven (diff_even  (eax, nax, edx, ndx),
-                                      diff_neven (eax, nax, edx, ndx),
-                                      diff_even  (eay, nay, edy, ndy),
-                                      diff_neven (eay, nay, edy, ndy)));
-                        
-        printf ("%d %d\n", v[0], v[1]);
     }
 
     return 0;

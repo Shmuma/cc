@@ -10,7 +10,10 @@
  */
 
 unsigned char oddity[4][4][4];
-unsigned int cnt_a[4], cnt_b[4], cnt_c[4], cnt_d[4];
+unsigned int cnt_b[4], cnt_d[4];
+unsigned char pts_a[30000], pts_c[30000];
+int pts_cnt_a, pts_cnt_c;
+
 
 void count (int n, int* even, int* neven)
 {
@@ -67,7 +70,7 @@ int is_area_odd (int xa, int ya, int xb, int yb, int xc, int yc)
 }
 
 
-int get_pt_kind (int x, int y)
+inline int get_pt_kind (int x, int y)
 {
     x = abs (x);
     y = abs (y);
@@ -93,15 +96,26 @@ int main(int argc, char *argv[])
     int total1, odd1, total2, odd2;
 
     /* generate oddity table */
-    for (i = 0; i < 4; i++)
-        for (j = 0; j < 4; j++)
+    for (i = 0; i < 4; i++) {
+        printf ("{\n");
+        for (j = 0; j < 4; j++) {
+            printf ("{ ");
             for (k = 0; k < 4; k++) {
                 get_pt_by_kind (i, &xa, &ya);
                 get_pt_by_kind (j, &xb, &yb);
                 get_pt_by_kind (k, &xc, &yc);
         
                 oddity[i][j][k] = is_area_odd (xa, ya, xb, yb, xc, yc);
+                printf ("%d", oddity[i][j][k]);
+                if (k != 3)
+                    putchar (',');
             }
+            printf (" },\n");
+        }
+        printf ("},\n");
+    }
+
+    return 0;
 
     scanf ("%d", &t);
     
@@ -109,37 +123,41 @@ int main(int argc, char *argv[])
         scanf ("%d", &n);
 
         for (i = 0; i < 4; i++)
-            cnt_a[i] = cnt_b[i] = cnt_c[i] = cnt_d[i] = 0;
+            cnt_b[i] = cnt_d[i] = 0;
+        
+        pts_cnt_a = pts_cnt_c = 0;
 
         for (i = 0; i < n; i++) {
             scanf ("%d %d", &x, &y);
             if (x == 0 || y == 0)
                 continue;
             if (x > 0 && y > 0)
-                cnt_a[get_pt_kind (x, y)]++;
+                pts_a[pts_cnt_a++] = get_pt_kind (x, y);
             if (x > 0 && y < 0)
                 cnt_b[get_pt_kind (x, y)]++;
             if (x < 0 && y < 0)
-                cnt_c[get_pt_kind (x, y)]++;
+                pts_c[pts_cnt_c++] = get_pt_kind (x, y);
             if (x < 0 && y > 0)
                 cnt_d[get_pt_kind (x, y)]++;
         }
 
-        total1 = odd1 = total2 = odd2 = 0;
-        for (i = 0; i < 4; i++)
-            for (j = 0; j < 4; j++)
+        res = 0;
+
+        for (i = 0; i < pts_cnt_a; i++)
+            for (j = 0; j < pts_cnt_c; j++) {
+                total1 = odd1 = 0;
+                total2 = odd2 = 0;
                 for (k = 0; k < 4; k++) {
-                    printf ("%d,%d,%d => %d\n", i, j, k, oddity[i][j][k] * cnt_a[i] * cnt_b[j] * cnt_c[k]);
-                    printf ("%d,%d,%d => %d\n", i, j, k, oddity[i][j][k] * cnt_a[i] * cnt_d[j] * cnt_c[k]);
-                    total1 += cnt_a[i] * cnt_b[j] * cnt_c[k];
-                    odd1 += oddity[i][j][k] * cnt_a[i] * cnt_b[j] * cnt_c[k];
-                    total2 += cnt_a[i] * cnt_d[j] * cnt_c[k];
-                    odd2 += oddity[i][j][k] * cnt_a[i] * cnt_d[j] * cnt_c[k];
+                    total1 += cnt_b[k];
+                    odd1 += cnt_b[k] * oddity[pts_a[i]][k][pts_c[j]];
+                    total2 += cnt_d[k];
+                    odd2 += cnt_d[k] * oddity[pts_a[i]][k][pts_c[j]];
                 }
 
-        printf ("odd1 = %d, total1 = %d, odd2 = %d, total2 = %d\n", odd1, total1, odd2, total2);
-        res = odd1 * odd2 + (total1 - odd1) * (total2 - odd2);
-        printf ("res = %d\n", res);
+                res += odd1 * odd2 + (total1 - odd1) * (total2 - odd2);
+            }
+            
+        printf ("%d\n", res);
     }
 
     return 0;

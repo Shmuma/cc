@@ -129,6 +129,8 @@ int main(int argc, char *argv[])
         for (i = 0; i < 4; i++)
             for (j = 0; j < 4; j++)
                 for (k = 0; k < 4; k++) {
+                    printf ("%d,%d,%d => %d\n", i, j, k, oddity[i][j][k] * cnt_a[i] * cnt_b[j] * cnt_c[k]);
+                    printf ("%d,%d,%d => %d\n", i, j, k, oddity[i][j][k] * cnt_a[i] * cnt_d[j] * cnt_c[k]);
                     total1 += cnt_a[i] * cnt_b[j] * cnt_c[k];
                     odd1 += oddity[i][j][k] * cnt_a[i] * cnt_b[j] * cnt_c[k];
                     total2 += cnt_a[i] * cnt_d[j] * cnt_c[k];

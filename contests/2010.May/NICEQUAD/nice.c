@@ -92,10 +92,11 @@ int main(int argc, char *argv[])
 
         res = 0;
 
+        total1 = cnt_b[0] + cnt_b[1] + cnt_b[2] + cnt_b[3];
+        total2 = cnt_d[0] + cnt_d[1] + cnt_d[2] + cnt_d[3];
+
         for (i = 0; i < pts_cnt_a; i++)
             for (j = 0; j < pts_cnt_c; j++) {
-                total1 = cnt_b[0] + cnt_b[1] + cnt_b[2] + cnt_b[3];
-                total2 = cnt_d[0] + cnt_d[1] + cnt_d[2] + cnt_d[3];
                 odd2 = odd1 = 0;
                 if (oddity[pts_a[i]][0][pts_c[j]]) {
                     odd1 += cnt_b[0];

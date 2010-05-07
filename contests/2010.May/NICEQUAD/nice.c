@@ -89,8 +89,8 @@ int main(int argc, char *argv[])
 {
     int t, n, i, j, k, x, y;
     int res;
-
     int xa, ya, xb, yb, xc, yc;
+    int total1, odd1, total2, odd2;
 
     /* generate oddity table */
     for (i = 0; i < 4; i++)
@@ -124,6 +124,20 @@ int main(int argc, char *argv[])
             if (x < 0 && y > 0)
                 cnt_d[get_pt_kind (x, y)]++;
         }
+
+        total1 = odd1 = total2 = odd2 = 0;
+        for (i = 0; i < 4; i++)
+            for (j = 0; j < 4; j++)
+                for (k = 0; k < 4; k++) {
+                    total1 += cnt_a[i] * cnt_b[j] * cnt_c[k];
+                    odd1 += oddity[i][j][k] * cnt_a[i] * cnt_b[j] * cnt_c[k];
+                    total2 += cnt_a[i] * cnt_d[j] * cnt_c[k];
+                    odd2 += oddity[i][j][k] * cnt_a[i] * cnt_d[j] * cnt_c[k];
+                }
+
+        printf ("odd1 = %d, total1 = %d, odd2 = %d, total2 = %d\n", odd1, total1, odd2, total2);
+        res = odd1 * odd2 + (total1 - odd1) * (total2 - odd2);
+        printf ("res = %d\n", res);
     }
 
     return 0;

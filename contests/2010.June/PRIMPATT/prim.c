@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-unsigned int primes[100000];
+unsigned int primes[150000];
 int primes_count;
 
 /* Integer square root by Halleck's method, with Legalize's speedup */
@@ -41,6 +41,7 @@ unsigned long long isqrt (x) unsigned long long x;{
 void primes_table ()
 {
     int n = 5, i, prime;
+    div_t q;
     
     primes[0] = 2;
     primes[1] = 3;
@@ -48,13 +49,15 @@ void primes_table ()
 
     while (primes_count < sizeof (primes) / sizeof (primes[0])) {
         prime = 1;
+
         for (i = 1; i < primes_count; i++) {
-            if (n % primes[i] == 0) {
+            q = div (n, primes[i]);
+            if (!q.rem) {
                 prime = 0;
                 break;
             }
 
-            if (n / primes[i] < primes[i])
+            if (q.quot < primes[i])
                 break;
         }
 
@@ -68,14 +71,16 @@ void primes_table ()
 int is_prime (unsigned long long n)
 {
     int i;
+    ldiv_t q;
 
     if (!n || n == 1)
         return 0;
 
     for (i = 0; i < primes_count; i++) {
-        if (n / primes[i] < primes[i])
+        q = ldiv (n, primes[i]);
+        if (q.quot < primes[i])
             return 1;
-        if ((n % primes[i]) == 0)
+        if (!q.rem)
             return 0;
     }
 
@@ -166,29 +171,52 @@ void num2coord (unsigned long long n, int *x, int *y)
 }
 
 
+int check_distance (unsigned long n, int dist)
+{
+    int x, y, t;
+    unsigned long long p;
+
+    num2coord (n, &x, &y);
+
+    for (t = 0; t < dist; t++) {
+        p = coord2num (x - dist + t, y - t);
+        if (is_prime (p))
+            return 1;
+        p = coord2num (x - dist + t, y + t);
+        if (is_prime (p))
+            return 1;
+        p = coord2num (x + dist - t, y - t);
+        if (is_prime (p))
+            return 1;
+        p = coord2num (x + dist - t, y + t);
+        if (is_prime (p))
+            return 1;
+    }
+
+    return 0;
+}
+
+
 int prime_distance (unsigned long long n)
 {
-    int delta = 1;
-    int x, y;
-    int cycle = 0;
-    int res, min = -1;
+    int i;
+
+    /* the only even prime: 2 */
+    if (n == 1)
+        return 1;
+
+    if ((n % 2) == 0)
+        i = 1;
+    else
+        i = 2;
 
     while (1) {
-        if (cycle)
-            if (num2cycle (delta) > cycle)
-                break;
-
-        if (is_prime (n + delta)) {
-            cycle = num2cycle (delta);
-            num2coord (delta, &x, &y);
-            res = abs (x) + abs (y);
-            if (min < 0 || res < min)
-                min = res;
-        }
-        delta++;
+        if (check_distance (n, i))
+            return i;
+        i += 2;
     }
-    
-    return min;
+
+    return 0;
 }
 
 
@@ -201,15 +229,16 @@ int main(int argc, char *argv[])
 
     primes_table ();
 
-/*     for (i = 0; i < 10000000; i++) { */
-/*         v = prime_distance (i); */
-/*         if (v > m) { */
-/*             m = v; */
-/*             printf ("%d -> %d distance\n", i, m); */
-/*         } */
-/*     } */
-/*     return 0; */
-
+#if 1
+    for (i = 0; i < 10000000; i++) {
+        v = prime_distance (i);
+        if (v > m) {
+            m = v;
+            printf ("%d -> %d distance\n", i, m);
+        }
+    }
+    return 0;
+#endif
 
     scanf ("%d", &t);
 

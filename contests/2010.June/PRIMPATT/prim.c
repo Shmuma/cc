@@ -73,7 +73,10 @@ int is_prime (unsigned long long n)
     int i;
     ldiv_t q;
 
-    if (!n || n == 1)
+    if (n == 2)
+        return 1;
+
+    if (n % 2 == 0 || n == 1)
         return 0;
 
     for (i = 0; i < primes_count; i++) {
@@ -88,19 +91,19 @@ int is_prime (unsigned long long n)
 }
 
 
-int abs (int n)
+inline int abs (int n)
 {
     return (n > 0) ? n : -n;
 }
 
 
-int max (int a, int b)
+inline int max (int a, int b)
 {
     return (a > b) ? a : b;
 }
 
 
-int num2cycle (unsigned long long n)
+inline int num2cycle (unsigned long long n)
 {
     return (isqrt (n) + 1) >> 1;
 }
@@ -171,10 +174,12 @@ void num2coord (unsigned long long n, int *x, int *y)
 }
 
 
+
 int check_distance (unsigned long n, int dist)
 {
     int x, y, t;
     unsigned long long p;
+    int *deltas;
 
     num2coord (n, &x, &y);
 
@@ -229,7 +234,7 @@ int main(int argc, char *argv[])
 
     primes_table ();
 
-#if 1
+#if 0
     for (i = 0; i < 10000000; i++) {
         v = prime_distance (i);
         if (v > m) {
@@ -245,6 +250,8 @@ int main(int argc, char *argv[])
     while (t--) {
         scanf ("%d %d", &x, &y);
         n = coord2num (x, y);
+
+        //        printf ("%llu\n", n);
 
         if (is_prime (n))
             printf ("0\n");

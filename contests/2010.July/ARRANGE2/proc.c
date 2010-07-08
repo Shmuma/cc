@@ -27,8 +27,8 @@ int main(int argc, char *argv[])
     fclose (f);
 
     for (i = 0; i < GROUP_SIZE; i++)
-        //        printf ("%010llu..%010llu: %d\n", diff*i, diff*(i+1), groups[i]);
-        printf ("%d, ", groups[i]);
+        printf ("%010llu..%010llu: %d\n", diff*i, diff*(i+1), groups[i]);
+    //        printf ("%d, ", groups[i]);
     printf ("\n");
     
     return 0;

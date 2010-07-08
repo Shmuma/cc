@@ -18,13 +18,18 @@ unsigned long long pows[] = {
 
 
 
-unsigned long long stat (unsigned long long n)
+unsigned long long stat (unsigned long long n, int* max_dig, int* digits)
 {
     unsigned long long res = 0;
 
+    *max_dig = 0;
+    *digits = 0;
+
     while (n) {
-        res += pows[n % 10];
+        *max_dig = n % 10;
+        res += pows[*max_dig];
         n /= 10;
+        *digits += 1;
     }
 
     return res;
@@ -34,11 +39,14 @@ unsigned long long stat (unsigned long long n)
 int brute (unsigned long long from, unsigned long long to)
 {
     int res = 0;
+    int max_digit, digits, a, b;
 
     while (from <= to) {
-        if (stat (from) == stat (from << 1))
+        if (stat (from, &max_digit, &digits) == stat (from << 1, &a, &b))
             res++;
         from++;
+        if (max_digit >= 5)
+            from = pows[digits];
     }
 
     return res;

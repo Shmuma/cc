@@ -1,0 +1,1 @@
+10 */2 * * * zabbix /usr/sbin/zabbix_sender -c /etc/zabbix/zabbix_agentd.conf -s fake-host.yandex.net -k icpc.rating -o $(/etc/zabbix/bin/get_icpc_rating.sh) > /dev/null

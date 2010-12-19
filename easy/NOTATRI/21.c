@@ -3,7 +3,7 @@
 
 
 int sticks_count;
-int sticks[2000];
+int sticks[2500];
 
 
 int compare (const void *a, const void *b)
@@ -11,30 +11,21 @@ int compare (const void *a, const void *b)
     const int *aa = a;
     const int *bb = b;
 
-    return *aa - *bb;
+    return *bb - *aa;
 }
 
 
 /*
- * Search for index of first entry, greater or equal val. Bound are inclusive
+ * Search for index of first entry, less than val. Bound are inclusive
  */
 int search (int from, int to, int val)
 {
-    int idx = to;
+    int i;
 
-    while (from < to) {
-        idx = (from + to) >> 1;
-
-        if (sticks[idx] > val)
-            to = idx-1;
-        else
-            from = idx+1;
-    }
-
-    if (sticks[idx] >= val)
-        return idx;
-    else
-        return idx+1;
+    for (i = from; i <= to; i++)
+        if (sticks[i] < val)
+            return i;
+    return to+1;
 }
 
 
@@ -43,17 +34,12 @@ int solve ()
     int res = 0;
     int i, j, k;
     int *p;
-    
-    i = sticks_count-1;
 
-    while (i > 0) {
-        j = i-1;
-
-        while (j > 0) {
-            res += search (0, j-1, sticks[i]-sticks[j]);
-            j--;
+    for (i = 0; i < sticks_count-2; i++) {
+        for (j = i+1; j < sticks_count-1; j++) {
+            k = search (j+1, sticks_count-1, sticks[i] - sticks[j]);
+            res += sticks_count - k;
         }
-        i--;
     }
 
     return res;

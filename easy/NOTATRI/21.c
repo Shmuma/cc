@@ -27,13 +27,16 @@ int search (int from, int to, int val)
     if (sticks[to] >= val)
         return to+1;
 
-    while (from <= to) {
+    while (from < to) {
         i = (from + to) >> 1;
         if (sticks[i] >= val)
             from = i+1;
         else
-            to = i-1;
+            to = i;
     }
+
+    while (sticks[i] >= val && i <= to)
+        i++;
 
     return i;
 }

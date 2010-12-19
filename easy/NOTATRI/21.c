@@ -20,12 +20,22 @@ int compare (const void *a, const void *b)
  */
 int search (int from, int to, int val)
 {
-    int i;
+    int i = to+1;
 
-    for (i = from; i <= to; i++)
-        if (sticks[i] < val)
-            return i;
-    return to+1;
+    if (sticks[from] < val)
+        return from;
+    if (sticks[to] >= val)
+        return to+1;
+
+    while (from <= to) {
+        i = (from + to) >> 1;
+        if (sticks[i] >= val)
+            from = i+1;
+        else
+            to = i-1;
+    }
+
+    return i;
 }
 
 

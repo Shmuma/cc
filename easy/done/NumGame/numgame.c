@@ -123,7 +123,7 @@ int main (int argc, char *argv[])
     int t;
     unsigned int n, res;
 
-    make_primes (35000);
+    //    make_primes (35000);
 
     scanf ("%d", &t);
     while (t--) {

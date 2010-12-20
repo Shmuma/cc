@@ -79,7 +79,7 @@ int check_cache (unsigned int n)
 
 
 /* return 0 if we will lost this turn, 1 if won */
-unsigned char solve (unsigned int n)
+unsigned int solve (unsigned int n)
 {
     int div_ofs, res;
     unsigned int nn;
@@ -121,17 +121,26 @@ unsigned char solve (unsigned int n)
 int main (int argc, char *argv[])
 {
     int t;
-    unsigned int n;
+    unsigned int n, res;
 
     make_primes (35000);
 
     scanf ("%d", &t);
     while (t--) {
         scanf ("%u", &n);
-        if (solve (n))
-            puts ("ALICE");
-        else
+        /*        res = solve (n);
+        if ((n % 2 && res != 0) || (n % 2 == 0 && res == 0)) {
+            printf ("%6u\t", n);
+            if (res)
+                puts ("ALICE");
+            else
+                puts ("BOB");
+        }
+        */
+        if (n % 2)
             puts ("BOB");
+        else
+            puts ("ALICE");
     }
 
     return 0;

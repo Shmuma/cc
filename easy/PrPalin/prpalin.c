@@ -6,10 +6,15 @@
 unsigned int digits[50];
 unsigned int digits_count;
 
-#define MAX_PRIMES 100000
+#define MAX_PRIMES 80000
 
 unsigned int primes[MAX_PRIMES];
 int primes_count;
+
+unsigned int pr_palin[200];
+unsigned int pr_palin_count;
+
+int is_palindrome (unsigned int n);
 
 
 void make_primes (int max)
@@ -19,6 +24,7 @@ void make_primes (int max)
     primes_count = 1;
     primes[0] = 2;
     val = 3;
+    pr_palin[pr_palin_count++] = 2;
 
     while (val <= max && primes_count < MAX_PRIMES) {
         i = 0;
@@ -32,8 +38,11 @@ void make_primes (int max)
             i++;
         }
 
-        if (is_prime)
+        if (is_prime) {
             primes[primes_count++] = val;
+            if (is_palindrome (val))
+                pr_palin[pr_palin_count++] = val;
+        }
         val += 2;
     }
 }
@@ -107,6 +116,21 @@ unsigned long long digits_to_num_inv (unsigned int* arr, unsigned int count)
     }
 
     return res;
+}
+
+
+int is_palindrome (unsigned int n)
+{
+    int i;
+
+    num_to_digits (n);
+
+    for (i = 0; i < digits_count >> 1; i++) {
+        if (digits[i] != digits[digits_count-i-1])
+            return 0;
+    }
+    
+    return 1;
 }
 
 
@@ -198,20 +222,26 @@ unsigned long long solve (unsigned long long base, int extra)
 
 int main (int argc, char *argv[])
 {
-    unsigned long long n, base, base_inv, rest_inv, palin;
-    int extra;
+    unsigned int n;
+    int i;
 
-    make_primes (1000000);
+    make_primes (1010000);
 
-    scanf ("%llu", &n);
-
+    scanf ("%u", &n);
+/*
     dissect (n, &base, &extra, &rest_inv, &base_inv);
 
     if (base_inv >= rest_inv)
         palin = solve (base, extra);
     else
         palin = solve (base+1, extra);
+*/
+    for (i = 0; i < pr_palin_count; i++) {
+        if (pr_palin[i] >= n) {
+            printf ("%u\n", pr_palin[i]);
+            break;
+        }
+    }
 
-    printf ("%llu\n", palin);
     return 0;
 }

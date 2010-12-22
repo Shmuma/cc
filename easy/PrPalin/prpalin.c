@@ -1,9 +1,61 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 
 unsigned int digits[50];
 unsigned int digits_count;
+
+#define MAX_PRIMES 100000
+
+unsigned int primes[MAX_PRIMES];
+int primes_count;
+
+
+void make_primes (int max)
+{
+    int val, i, max_mul, is_prime;
+
+    primes_count = 1;
+    primes[0] = 2;
+    val = 3;
+
+    while (val <= max && primes_count < MAX_PRIMES) {
+        i = 0;
+        max_mul = (int)sqrt (val);
+        is_prime = 1;
+        while (i < primes_count && primes[i] <= max_mul) {
+            if ((val % primes[i]) == 0) {
+                is_prime = 0;
+                break;
+            }
+            i++;
+        }
+
+        if (is_prime)
+            primes[primes_count++] = val;
+        val += 2;
+    }
+}
+
+
+int is_prime (unsigned long long n)
+{
+    int i;
+
+    if (n == 1)
+        return 1;
+
+    for (i = 0; i < primes_count; i++) {
+        if (n == primes[i])
+            return 1;
+        if ((n % primes[i]) == 0)
+            return 0;
+    }
+
+    return 1;
+}
+
 
 
 void num_to_digits (unsigned long long n)
@@ -134,14 +186,13 @@ void next_palin (unsigned long long* base, int* extra, int* digits)
 
 unsigned long long solve (unsigned long long base, int extra)
 {
-    int i, digits = count_digits (base);
+    int digits = count_digits (base);
 
-    for (i = 0; i < 100; i++) {
+    while (!is_prime (make_palin (base, extra))) {
         next_palin (&base, &extra, &digits);
-        printf ("%llu\n", make_palin (base, extra));
     }
 
-    return 0;
+    return make_palin (base, extra);
 }
 
 
@@ -149,6 +200,8 @@ int main (int argc, char *argv[])
 {
     unsigned long long n, base, base_inv, rest_inv, palin;
     int extra;
+
+    make_primes (1000000);
 
     scanf ("%llu", &n);
 

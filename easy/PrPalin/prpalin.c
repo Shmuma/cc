@@ -44,7 +44,7 @@ int is_prime (unsigned long long n)
     int i;
 
     if (n == 1)
-        return 1;
+        return 0;
 
     for (i = 0; i < primes_count; i++) {
         if (n == primes[i])
@@ -207,7 +207,7 @@ int main (int argc, char *argv[])
 
     dissect (n, &base, &extra, &rest_inv, &base_inv);
 
-    if (base_inv > rest_inv)
+    if (base_inv >= rest_inv)
         palin = solve (base, extra);
     else
         palin = solve (base+1, extra);

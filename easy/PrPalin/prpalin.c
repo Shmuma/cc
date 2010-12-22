@@ -16,6 +16,19 @@ void num_to_digits (unsigned long long n)
 }
 
 
+int count_digits (unsigned long long n)
+{
+    int res = 0;
+
+    while (n > 0) {
+        n /= 10;
+        res++;
+    }
+
+    return res;
+}
+
+
 unsigned long long digits_to_num (unsigned int* arr, unsigned int count)
 {
     int i;
@@ -55,15 +68,18 @@ void dissect (unsigned long long n, unsigned long long* base, int* extra, unsign
 
     if (digits_count % 2) {
         *base = digits_to_num (digits+(base_count+1), base_count);
-        *base_inv = digits_to_num_inv (digits+(base_count+1), base_count);
+        if (base_inv)
+            *base_inv = digits_to_num_inv (digits+(base_count+1), base_count);
         *extra = digits[base_count];
     }
     else {
         *base = digits_to_num (digits + base_count, base_count);
-        *base_inv = digits_to_num_inv (digits + base_count, base_count);
+        if (base_inv)
+            *base_inv = digits_to_num_inv (digits + base_count, base_count);
         *extra = -1;
     }
-    *rest_inv = digits_to_num_inv (digits, base_count);
+    if (rest_inv)
+        *rest_inv = digits_to_num_inv (digits, base_count);
 }
 
 
@@ -86,15 +102,46 @@ unsigned long long make_palin (unsigned long long base, int extra)
 }
 
 
+void next_palin (unsigned long long* base, int* extra, int* digits)
+{
+    int dig;
+    unsigned long long palin;
+
+    if (*extra >= 0) {
+        if (*extra == 9)
+            *extra = 0;
+        else {
+            (*extra)++;
+            return;
+        }
+    }
+
+    (*base)++;
+    dig = count_digits (*base);
+
+    if (dig != *digits) {
+        if (*extra < 0) {
+            palin = make_palin ((*base) / 10, 0);
+            dissect (palin, base, extra, NULL, NULL);
+            dig = count_digits (*base);
+        }
+        else
+            *extra = -1;
+        *digits = dig;
+    }
+}
+
 
 unsigned long long solve (unsigned long long base, int extra)
 {
-    int i;
+    int i, digits = count_digits (base);
 
-    for (i = 0; i < 100; i++)
-        printf ("%llu\n", make_palin (base+i, extra));
+    for (i = 0; i < 100; i++) {
+        next_palin (&base, &extra, &digits);
+        printf ("%llu\n", make_palin (base, extra));
+    }
 
-    return make_palin (base, extra);
+    return 0;
 }
 
 

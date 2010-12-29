@@ -43,7 +43,7 @@ int add_c (src_t* src, dest_t* dest)
     src->total--;
     dest->c++;
 
-    if ((dest->c + 3) / 4 > (dest->w + dest->m)) {
+    if (((dest->c + 3) >> 2) > (dest->w + dest->m)) {
         /* we need an adult to be placed */
         if (!add_w (src, dest))
             if (!add_m (src, dest)) {
@@ -69,7 +69,7 @@ int add_w (src_t* src, dest_t* dest)
     src->total--;
     dest->w++;
 
-    if ((dest->w+1) / 2 > dest->m) {
+    if (((dest->w+1) >> 1) > dest->m) {
         if (!add_m (src, dest)) {
             src->w++;
             src->total++;
@@ -106,7 +106,7 @@ void solve (src_t* src, dest_t* dest)
 {
     dest->c = dest->w = dest->m = 0;
 
-    while (!finish (src)) {
+    while (1) {
         if (!add_c (src, dest))
             if (!add_w (src, dest))
                 if (!add_m (src, dest))

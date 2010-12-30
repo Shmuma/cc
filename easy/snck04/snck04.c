@@ -2,8 +2,14 @@
 #include <stdlib.h>
 
 
-int solve (int n);
+int max_n;
 
+
+int solve ();
+
+int branch_1 (int m, int n);
+int branch_2 (int m, int n);
+int branch_3 (int m, int n);
 
 
 int main (int argc, char *argv[])
@@ -13,43 +19,23 @@ int main (int argc, char *argv[])
     scanf ("%d", &t);
     while (t--) {
         scanf ("%d", &n);
-        printf ("%d\n", solve (n));
+        max_n = n;
+        printf ("%d\n", solve ());
     }
     return 0;
 }
 
 
-inline int abs (int n)
+int count (int a, int b)
 {
-    return n < 0 ? -n : n;
+    if (b > max_n)
+        return 0;
+
+    return 1 + count (a, a+b) + count (b, a+b);
 }
 
 
-int gcd (int a, int b)
+int solve ()
 {
-    printf ("gcd %d, %d\n", a, b);
-    while (b)
-        b ^= a ^= b ^= a %= b;
-    return a;
-}
-
-
-/* Need to check this: http://en.wikipedia.org/wiki/Coprime#Generating_all_coprime_pairs */
-
-int solve (int n)
-{
-    int i, j, res = 0;
-    int j_inc;
-
-    for (i = 1; i <= n; i++) {
-        j = i+1;
-        j_inc = 2 - (i % 2);
-        while (j <= n) {
-            if (gcd (i, j) == 1)
-                res++;
-            j += j_inc;
-        }
-    }
-
-    return res;
+    return count (1, 2);
 }

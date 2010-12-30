@@ -11,6 +11,10 @@ int primes[MAX_PRIMES];
 int primes_count;
 
 
+unsigned int cache[1000][2];
+unsigned int cache_size;
+
+
 
 unsigned long isqrt(unsigned long x)  
 {  
@@ -106,13 +110,38 @@ int phi (int n)
 }
 
 
+void lookup_cache (int n, int* idx, unsigned int* sum)
+{
+    int delta = 1000000;
+    int i;
+
+    *sum = *idx = 0;
+
+    for (i = 0; i < cache_size; i++) {
+        if (cache[i][0] <= n && delta > (n-cache[i][0])) {
+            *idx = cache[i][0];
+            *sum = cache[i][1];
+            delta = n-cache[i][0];
+        }
+    }
+}
+
+
 unsigned int solve (int n)
 {
     unsigned int sum = 0;
     int i;
 
-    for (i = 0; i < n; i++)
+    lookup_cache (n, &i, &sum);
+
+    while (i < n) {
         sum += phi (i+1);
+        i++;
+    }
+
+    cache[cache_size][0] = n;
+    cache[cache_size][1] = sum;
+    cache_size++;
 
     return sum;
 }

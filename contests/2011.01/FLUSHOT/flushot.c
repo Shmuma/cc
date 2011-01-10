@@ -2,40 +2,59 @@
 #include <stdlib.h>
 
 double places[10001];
+double t;
+int n;
 
-
-double solve (double t, int n, int first_move)
+inline double max (double a, double b)
 {
-    double prev = -t, d = 0.0, new_place;
-    int i;
+    return (a > b) ? a : b;
+}
 
-    for (i = 0; i < n; i++) {
-        if (places[i] - prev > t) {
-            if (places[i] - prev - t < d || (i == 0 && first_move)) {
-                new_place = places[i] - (places[i] - prev - t);
-                if (i == 0)
-                    d = (places[i] - prev - t);
-            }
-            else
-                new_place = places[i] - d;
+inline double min (double a, double b)
+{
+//    printf ("min %lf, %lf\n", a, b);
+    return (a > b) ? b : a;
+}
+
+double solve (double pos, int idx);
+
+double do_solve (double pos, int idx, double delta)
+{
+    return max (solve (pos, idx), delta);
+}
+
+double solve (double pos, int idx)
+{
+    double d = 0.0, dd;
+
+    if (idx == n)
+        return d;
+
+//    printf ("+solve (%lf, %d)\n", pos, idx);
+
+    if (places[idx] - pos > t) {
+        /* we have space to make step to the left - find the optimal value */
+        d = places[idx] - pos - t;
+        dd = //min (solve (places[idx], idx+1), 
+                  min (do_solve (places[idx] - d, idx+1, d),
+                       do_solve (places[idx] - d/2, idx+1, d/2));
+    }
+    else
+        if (places[idx] - pos < t) {
+            d = t - (places[idx] - pos);
+            dd = do_solve (places[idx] + d, idx+1, d);
         }
         else
-            if (places[i] - prev < t) {
-                if (t - (places[i] - prev) > d)
-                    d = t - (places[i] - prev);
-                new_place = places[i] + (t - (places[i] - prev));
-            }
-        prev = new_place;
-    }
-
-    return d;
+            dd = solve (places[idx], idx+1);
+//    printf ("-solve (%lf, %d) => %lf\n", pos, idx, dd);
+    return dd;
 }
 
 
 int main (int argc, char *argv[])
 {
-    int cnt, n, i;
-    double t, r1, r2;
+    int cnt, i;
+    double r1, r2;
 
     scanf ("%d", &cnt);
 
@@ -43,12 +62,7 @@ int main (int argc, char *argv[])
         scanf ("%d %lf", &n, &t);
         for (i = 0; i < n; i++)
             scanf ("%lf", &places[i]);
-        r1 = solve (t, n, 0);
-        r2 = solve (t, n, 1);
-        if (r1 < r2)
-            printf ("%.4lf\n", r1);
-        else
-            printf ("%.4lf\n", r2);
+        printf ("%.4lf\n", solve (-t, 0));
     }
 
     return 0;

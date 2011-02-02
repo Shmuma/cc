@@ -8,11 +8,12 @@ int inc_len[500];
 int incidence[500][500];
 
 int color[500];
+int degree[500][2];
 
 
 int is_bipart (int n);
 int do_color (int node, int val);
-void do_three_color (int n);
+void do_approx_color (int n);
 
 int main(int argc, char *argv[])
 {
@@ -24,6 +25,7 @@ int main(int argc, char *argv[])
         memset (&inc_len, 0, sizeof (inc_len));
         memset (&incidence, 0, sizeof (incidence));
         memset (&color, 0, sizeof (color));
+        memset (&degree, 0, sizeof (degree));
 
         scanf ("%d %d", &n, &m);
 
@@ -33,6 +35,8 @@ int main(int argc, char *argv[])
             v--;
             incidence[u][inc_len[u]++] = v;
             incidence[v][inc_len[v]++] = u;
+            degree[u][1]++;
+            degree[v][1]++;
         }
         
         if (m == 0) {            /* trivial - process all */
@@ -44,24 +48,17 @@ int main(int argc, char *argv[])
             putchar ('\n');
         }
         else {
-            if (is_bipart (n)) {
-                for (i = 0; i < n; i++) {
-                    printf ("%d", color[i]);
-                    if (i < n-1)
-                        putchar (' ');
-                }
-                putchar ('\n');
+            if (!is_bipart (n)) {
+                memset (&color, 0, sizeof (color));
+                do_approx_color (n);
             }
-            else {
-                do_three_color (n);
 
-                for (i = 1; i <= n; i++) {
-                    printf ("%d", i);
-                    if (i < n)
-                        putchar (' ');
-                }
-                putchar ('\n');
+            for (i = 0; i < n; i++) {
+                printf ("%d", color[i]);
+                if (i < n-1)
+                    putchar (' ');
             }
+            putchar ('\n');
         }
     }
     return 0;
@@ -110,12 +107,39 @@ int do_bi_color (int node, int val)
 }
 
 
-
-void do_three_color (int n)
+int comp_degree (const void* a, const void* b)
 {
-    int i;
+    int* aa = (int*)a;
+    int* bb = (int*)b;
 
-    for (i = 0; i < n; i++) {
-        if (inc_len[i])
+    return bb[1] - aa[1];
+}
+
+
+void do_approx_color (int n)
+{
+    int i, k, j;
+    int count = n, flg, ver;
+
+    for (i = 0; i < n; i++)
+        degree[i][0] = i;
+
+    qsort (degree, n, sizeof (degree[0]), comp_degree);
+
+    k = 1;
+    while (count) {
+        for (i = 0; i < n; i++) {
+            ver = degree[i][0];
+            if (!color[ver]) {
+                flg = 0;
+                for (j = 0; !flg && j < inc_len[ver]; j++)
+                    flg = color[incidence[ver][j]] == k;
+                if (!flg) {
+                    color[ver] = k;
+                    count--;
+                }
+            }
+        }
+        k++;
     }
 }

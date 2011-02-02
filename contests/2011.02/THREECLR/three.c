@@ -12,7 +12,7 @@ int color[500];
 
 int is_bipart (int n);
 int do_color (int node, int val);
-
+void do_three_color (int n);
 
 int main(int argc, char *argv[])
 {
@@ -53,6 +53,8 @@ int main(int argc, char *argv[])
                 putchar ('\n');
             }
             else {
+                do_three_color (n);
+
                 for (i = 1; i <= n; i++) {
                     printf ("%d", i);
                     if (i < n)
@@ -77,13 +79,13 @@ int is_bipart (int n)
             con = i;
 
     if (con >= 0)
-        return do_color (con, 1);
+        return do_bi_color (con, 1);
     else
         return 1;
 }
 
 
-int do_color (int node, int val)
+int do_bi_color (int node, int val)
 {
     int i, res = 1, old;
 
@@ -96,7 +98,7 @@ int do_color (int node, int val)
     for (i = 0; i < inc_len[node]; i++) {
         old = color[incidence[node][i]];
         if (old == 0) {
-            if (!do_color (incidence[node][i], val))
+            if (!do_bi_color (incidence[node][i], val))
                 return 0;
         }
         else
@@ -105,4 +107,15 @@ int do_color (int node, int val)
     }
 
     return 1;
+}
+
+
+
+void do_three_color (int n)
+{
+    int i;
+
+    for (i = 0; i < n; i++) {
+        if (inc_len[i])
+    }
 }

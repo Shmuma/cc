@@ -16,25 +16,25 @@ def multinomial (l):
     return r
 
 
-def divide (n, m):
-    """
-    Generates all decreasing sequences of length m sum of which are n:
-    {4,0,0},{3,1,0},{2,1,1},{2,2,0}
-    """
-    res = []
-    v = [n] + [0]*(m-1)
-    res.append (v)
-    
+def fun (n, k, p):
+    if n < p:
+        return binomial (n+k-1, n)
+    lim = (n/p)*p
+    res = 0
+    for d in range (lim, n+1):
+        t = n-d+1
+        if t > k:
+            continue
+        v = binomial (k, k-t)*factorial (t)
+        print t, v
+        res += v
     return res
 
 
-def fun (n, k, p, i):
-    if k == 2:
-        return binomial (n, i) % p
-
-
 def res (n, k, p):
-    res = 0
-    for i in range (n+1):
-        res += fun (n, k, p, i)
+    res = 1
+    for i in range (1, n+1):
+        v = fun (i, k, p)
+        res += v
+        print "fun (%d, %d, %d) = %d" % (i, k, p, v)
     return res

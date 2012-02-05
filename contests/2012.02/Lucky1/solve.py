@@ -72,10 +72,18 @@ def solve (n):
             sum += table[j][2] - table[j][3]
             if not sum:
 #                print "Equal between group at %d, len %d and group at %d, len %d" % (table[i][0], table[i][1], table[j][0], table[j][1])
-                res += table[i][1] * table[j][1]
-                dat = generate (table[i], table[j])
-                pairs += dat
-                assert (len (dat) == table[i][1] * table[j][1])
+                if table[i][2] != 0 or table[i][3] != 0:
+                    la = 1
+                else:
+                    la = table[i][1]
+                if table[j][2] != 0 or table[j][3] != 0:
+                    lb = 1
+                else:
+                    lb = table[i][1]
+                res += la * lb
+#                dat = generate (table[i], table[j])
+#                pairs += dat
+#                assert (len (dat) == la * lb)
     pairs.sort (cmp = sort_pairs)
     for i, j in pairs:
         print i, j

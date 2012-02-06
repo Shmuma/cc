@@ -41,8 +41,16 @@ def generate_zero (entry):
 
 def generate (entry_a, entry_b):
     res = []
-    for i in range (entry_a[0], entry_a[0] + entry_a[1]):
-        for j in range (entry_b[0], entry_b[0] + entry_b[1]):
+    if entry_a[2] != 0 or entry_a[3] != 0:
+        ra = [entry_a[0] + entry_a[1] - 1]
+    else:
+        ra = range (entry_a[0], entry_a[0] + entry_a[1])
+    if entry_b[2] != 0 or entry_b[3] != 0:
+        rb = [entry_b[0] + entry_b[1] - 1]
+    else:
+        rb = range (entry_b[0], entry_b[0] + entry_b[1])
+    for i in ra:
+        for j in rb:
             res.append ((i, j))
     return res
 
@@ -79,11 +87,15 @@ def solve (n):
                 if table[j][2] != 0 or table[j][3] != 0:
                     lb = 1
                 else:
-                    lb = table[i][1]
+                    lb = table[j][1]
                 res += la * lb
-#                dat = generate (table[i], table[j])
-#                pairs += dat
-#                assert (len (dat) == la * lb)
+                dat = generate (table[i], table[j])
+                pairs += dat
+                if len (dat) != la*lb:
+                    print dat
+                    print la, lb
+                    print "%d != %d" % (len (dat), la*lb)
+                assert (len (dat) == la * lb)
     pairs.sort (cmp = sort_pairs)
     for i, j in pairs:
         print i, j

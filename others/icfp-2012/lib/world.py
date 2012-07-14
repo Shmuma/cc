@@ -9,12 +9,14 @@ class World (object):
     # lifts positions
     lifts = []
 
+    # remaining lambdas positions
+    lambdas = []
+
     # map characters
     map_lines = []
 
     # amount of lambdas
-    lambdas = 0
-    init_lambdas = 0
+    init_lambdas_count = 0
 
     # maze size
     bounds = 0, 0
@@ -40,15 +42,16 @@ class World (object):
                 self.robot = (i, pos)
             except:
                 pass
-            # lambda count
-            self.init_lambdas += l.count ('\\')
+            # lambdas
+            self.lambdas += [(j, i) for j, c in enumerate (l) if c == '\\']
+
             # lifts
             try:
                 pos = l.index ('L')
                 self.lifts.append ((pos, i))
             except:
                 pass
-        self.lambdas = self.init_lambdas
+        self.init_lambdas_count = len (self.lambdas)
         self.bounds = len (self.map_lines[0]), len (self.map_lines)
 
 
@@ -58,7 +61,7 @@ class World (object):
         """
         print "Tick: %d" % self.ticks_passed
         print "Robot: %d, %d" % self.robot
-        print "Lambdas: %d" % self.lambdas
+        print "Lambdas: %s" % self.lambdas
         print "Lifts: %s" % self.lifts
         print "Scores: %d" % self.scores
         self.show ()
@@ -94,9 +97,9 @@ class World (object):
         otherwise
         """
         if action == 'A':
-            self.scores += (self.init_lambdas - self.lambdas) * 25
+            self.scores += (self.init_lambdas_count - len (self.lambdas)) * 25
             return None
-
+        self.scores -= 1
         deltas = {"L": (-1, 0), "R": (+1, 0), "U": (0, +1), "D": (0, -1)}
         if not action in deltas:
             return False
@@ -108,23 +111,21 @@ class World (object):
         ch = self.get_cell (nx, ny)
 
         if ch in ' .\\O':
-            self.scores -= 1
             # move is valid, update map
             self.map_lines[y][x] = ' '
             self.map_lines[ny][nx] = 'R'
             self.robot = nx, ny
             if ch == '\\':
                 self.scores += 25
-                self.lambdas -= 1
+                self.lambdas.remove ((nx, ny))
             if ch == 'O':
-                self.scores += self.init_lambdas * 50
+                self.scores += self.init_lambdas_count * 50
                 return True
         else:
             # check for rock move
             if action in "LR" and ch == "*":
                 n2x = x + 2*dx
                 if self.in_bounds (n2x, y) and self.get_cell (n2x, y) == ' ':
-                    self.scores -= 1
                     self.map_lines[y][n2x] = '*'
                     self.map_lines[y][x] = ' '
                     self.map_lines[y][nx] = 'R'
@@ -139,7 +140,7 @@ class World (object):
         Returns True if robot was destroyed by rock, False otherwise
         """
         # if lambdas counter reached zero, open all lifts
-        if self.lambdas == 0:
+        if len (self.lambdas) == 0:
             for x,y in self.lifts:
                 self.map_lines[y][x] = 'O'
 

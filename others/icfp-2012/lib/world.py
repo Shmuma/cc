@@ -126,9 +126,45 @@ class World (object):
     def tick (self):
         """
         Update world's state according rules (fall boulder, etc)
+        Returns True if robot was destroyed by rock, False otherwise
         """
         # if lambdas counter reached zero, open all lifts
         if self.lambdas == 0:
             for x,y in self.lifts:
                 self.map_lines[y][x] = 'O'
-        pass
+
+        # rocks fall (inefficient), don't process first line
+        # we save falling rocks into list (rock coords, new_coord) to fulfill simulatenous update
+        fall_list = []
+        for y in range (1, self.bounds[1]):
+            for x in range (self.bounds[0]):
+                if self.get_cell (x, y) == '*':
+                    # empty space
+                    dn_cell = self.get_cell (x, y-1)
+                    if dn_cell == ' ':
+                        fall_list.append ([(x, y), (x, y-1)])
+                        continue
+                    # fall left or right
+                    if dn_cell == '*':
+                        if self.in_bounds (x+1, y):
+                            if self.get_cell (x+1, y) == ' ' and self.get_cell (x+1, y-1) == ' ':
+                                fall_list.append ([(x, y), (x+1, y-1)])
+                                continue
+                        if self.in_bounds (x-1, y):
+                            if self.get_cell (x-1, y) == ' ' and self.get_cell (x-1, y-1) == ' ':
+                                fall_list.append ([(x, y), (x-1, y-1)])
+                                continue
+                    if dn_cell == '\\':
+                        if self.in_bounds (x+1, y):
+                            if self.get_cell (x+1, y) == ' ' and self.get_cell (x+1, y-1) == ' ':
+                                fall_list.append ([(x, y), (x+1, y-1)])
+                                continue
+        destroyed = False
+        for s, d in fall_list:
+            print "%s -> %s" % (s, d)
+            self.map_lines[s[1]][s[0]] = ' '
+            self.map_lines[d[1]][d[0]] = '*'
+            # check for robot destruction
+            if self.robot == (d[0], d[1]-1):
+                destroyed = True
+        return destroyed

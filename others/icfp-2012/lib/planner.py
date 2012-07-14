@@ -1,11 +1,13 @@
 import heapq
 
+from world import dist
+
 
 def heur (world, goal):
     """
     Heruistic function for A*. Calculate manhatten distance between robot and goal
     """
-    return abs (goal[0] - world.robot[0]) + abs (goal[1] - world.robot[1])
+    return dist (goal, world.robot)
 
 
 def heap_entry (world, goal):
@@ -17,7 +19,8 @@ def heap_entry (world, goal):
 
 def make_plan (world, goal):
     """
-    Builds a plan to reach a goal point with best score. Returns pair with plan string and score obtained.
+    Builds a plan to reach a goal point with best score.
+    Returns pair with plan string and world state.
     """
     # each entry in the heap is a pair of:
     # - sum of count of steps performed and heruistic
@@ -26,13 +29,11 @@ def make_plan (world, goal):
     heapq.heappush (heap, heap_entry (world, goal))
     while len (heap) > 0:
         prio, w = heapq.heappop (heap)
-#        print "Got entry with pos %s and prio %d" % (str (w.robot), prio)
         # check that goal reached
         if w.robot == goal:
-            return "".join (w.history), w.scores
+            return "".join (w.history), w
         # not there yet - trying to move somewhere
         for a in "UDLR":
-#            print "We at %s, do '%s'" % (str (w.robot), a)
             w2 = w.clone ()
             w2.do_action (a)
             if w2.robot != w.robot:
@@ -41,12 +42,7 @@ def make_plan (world, goal):
                     # robot not destroyed - good
                     entry = heap_entry (w2, goal)
                     heapq.heappush (heap, entry)
-#                    print "Ok, push entry with pos %s and prio %d" % (str (entry[1].robot), entry[0])
-#                else:
-#                    print "Destroyed"
-#            else:
-#                print "Skipped"
         # TODO: check that world is unstable and try to wait
     # no way to reach for a goal
-    return None, 0
+    return None, None
 

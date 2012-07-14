@@ -43,7 +43,7 @@ class World (object):
             # robot position
             try:
                 pos = l.index ('R')
-                self.robot = (i, pos)
+                self.robot = (pos, i)
             except:
                 pass
             # lambdas
@@ -200,3 +200,11 @@ class World (object):
             if self.robot == (d[0], d[1]-1):
                 destroyed = True
         return destroyed
+
+
+def dist (a, b):
+    """
+    Return Manhattan distance between two points
+    """
+    return abs (a[0] - b[0]) + abs (a[1] - b[1])
+    

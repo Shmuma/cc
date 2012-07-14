@@ -2,22 +2,35 @@
 
 import sys
 import logging
+import heapq
 
-from lib.world import World
+from lib.world import World, dist
 from lib.planner import make_plan
 
 
-w = World ()
-w.parse (sys.stdin.readlines ())
-w.show_full ()
+w_init = World ()
+w_init.parse (sys.stdin.readlines ())
+w_init.show_full ()
 
-goal = w.lambdas[2]
-print "Trying to reach lambda %s" % str (goal)
+w = w_init.clone ()
+goals = [(dist (l, w.robot), l) for l in w.lambdas]
+goals.sort ()
+print goals
+print len (goals)
 
-plan, score = make_plan (w, goal)
+for d, g in goals:
+    plan, w2 = make_plan (w, g)
+    if plan:
+        w = w2
+        score = w2.scores
+    else:
+        plan = "".join (w.history) + "A"
+        score = w.scores
 
+#plan = "LDRDDUULLLDDL"
 print "Got plan '%s' with score %d, verify" % (plan, score)
 
+w = w_init.clone ()
 for a in plan:
     print "Action '%s'" % a
     act_res = w.do_action (a)

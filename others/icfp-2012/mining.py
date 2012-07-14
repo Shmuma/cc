@@ -46,9 +46,13 @@ def next_map (map_data, action):
 w = World (sys.stdin.readlines ())
 w.show_full ()
 
-for a in "DLLLDDRRRLULLLDL":
+for a in "RRUDRRULURULLLLDDDL":
     print "Action '%s'" % a
-    if w.do_action (a):
+    act_res = w.do_action (a)
+    if act_res == None:
+        print "Aborted!"
+        break
+    if act_res:
         print "Solved!"
         break
     if w.tick ():
@@ -56,3 +60,4 @@ for a in "DLLLDDRRRLULLLDL":
         w.show ()
         break
     w.show ()
+print "Scores: %d" % w.scores

@@ -14,12 +14,13 @@ class World (object):
 
     # amount of lambdas
     lambdas = 0
+    init_lambdas = 0
 
     # maze size
     bounds = 0, 0
 
     ticks_passed = 0
-
+    scores = 0
 
     def __init__ (self, lines):
         """
@@ -40,14 +41,14 @@ class World (object):
             except:
                 pass
             # lambda count
-            self.lambdas += l.count ('\\')
+            self.init_lambdas += l.count ('\\')
             # lifts
             try:
                 pos = l.index ('L')
                 self.lifts.append ((pos, i))
             except:
                 pass
-            
+        self.lambdas = self.init_lambdas
         self.bounds = len (self.map_lines[0]), len (self.map_lines)
 
 
@@ -59,6 +60,7 @@ class World (object):
         print "Robot: %d, %d" % self.robot
         print "Lambdas: %d" % self.lambdas
         print "Lifts: %s" % self.lifts
+        print "Scores: %d" % self.scores
         self.show ()
 
 
@@ -88,9 +90,13 @@ class World (object):
 
     def do_action (self, action):
         """
-        Apply robot action to world. Return true if maze completed, false
+        Apply robot action to world. Return None if abort performed, true if maze completed, false
         otherwise
         """
+        if action == 'A':
+            self.scores += (self.init_lambdas - self.lambdas) * 25
+            return None
+
         deltas = {"L": (-1, 0), "R": (+1, 0), "U": (0, +1), "D": (0, -1)}
         if not action in deltas:
             return False
@@ -102,19 +108,23 @@ class World (object):
         ch = self.get_cell (nx, ny)
 
         if ch in ' .\\O':
+            self.scores -= 1
             # move is valid, update map
             self.map_lines[y][x] = ' '
             self.map_lines[ny][nx] = 'R'
             self.robot = nx, ny
             if ch == '\\':
+                self.scores += 25
                 self.lambdas -= 1
             if ch == 'O':
+                self.scores += self.init_lambdas * 50
                 return True
         else:
             # check for rock move
             if action in "LR" and ch == "*":
                 n2x = x + 2*dx
                 if self.in_bounds (n2x, y) and self.get_cell (n2x, y) == ' ':
+                    self.scores -= 1
                     self.map_lines[y][n2x] = '*'
                     self.map_lines[y][x] = ' '
                     self.map_lines[y][nx] = 'R'

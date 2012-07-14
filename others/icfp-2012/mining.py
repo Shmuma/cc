@@ -7,10 +7,11 @@ from lib.world import World
 from lib.planner import make_plan
 
 
-w = World (sys.stdin.readlines ())
+w = World ()
+w.parse (sys.stdin.readlines ())
 w.show_full ()
 
-goal = w.lambdas[0]
+goal = w.lambdas[2]
 print "Trying to reach lambda %s" % str (goal)
 
 plan, score = make_plan (w, goal)

@@ -24,7 +24,11 @@ class World (object):
     ticks_passed = 0
     scores = 0
 
-    def __init__ (self, lines):
+    # history of commands
+    history = []
+
+
+    def parse (self, lines):
         """
         Create world from lines read from stdin
         """
@@ -52,7 +56,24 @@ class World (object):
             except:
                 pass
         self.init_lambdas_count = len (self.lambdas)
-        self.bounds = len (self.map_lines[0]), len (self.map_lines)
+        self.bounds = len (self.map_lines[0]), len (self.map_lines)       
+
+
+    def clone (self):
+        """
+        Clone the world state
+        """
+        w = World ()
+        w.robot = self.robot
+        w.lifts = list (self.lifts)
+        w.lambdas = list (self.lambdas)
+        w.map_lines = [list (l) for l in self.map_lines]
+        w.init_lambdas_count = self.init_lambdas_count
+        w.bounds = self.bounds
+        w.ticks_passed = self.ticks_passed
+        w.scores = self.scores
+        w.history = list (self.history)
+        return w
 
 
     def show_full (self):
@@ -96,6 +117,7 @@ class World (object):
         Apply robot action to world. Return None if abort performed, true if maze completed, false
         otherwise
         """
+        self.history.append (action)
         if action == 'A':
             self.scores += (self.init_lambdas_count - len (self.lambdas)) * 25
             return None
@@ -131,9 +153,8 @@ class World (object):
                     self.map_lines[y][nx] = 'R'
                     self.robot = nx, ny
         return False
-                    
 
-        
+
     def tick (self):
         """
         Update world's state according rules (fall boulder, etc)
@@ -172,7 +193,7 @@ class World (object):
                                 continue
         destroyed = False
         for s, d in fall_list:
-            print "%s -> %s" % (s, d)
+#            print "%s -> %s" % (s, d)
             self.map_lines[s[1]][s[0]] = ' '
             self.map_lines[d[1]][d[0]] = '*'
             # check for robot destruction

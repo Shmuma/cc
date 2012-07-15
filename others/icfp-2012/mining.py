@@ -14,21 +14,10 @@ w_init.show_full ()
 
 w = w_init.clone ()
 goals = [(dist (l, w.robot), l) for l in w.lambdas]
-goals.sort ()
-print goals
-print len (goals)
-
-for d, g in goals:
-    plan, w2 = make_plan (w, g)
-    if plan:
-        w = w2
-        score = w2.scores
-    else:
-        plan = "".join (w.history) + "A"
-        score = w.scores
+plan, w2 = make_plan (w)
 
 #plan = "LDRDDUULLLDDL"
-print "Got plan '%s' with score %d, verify" % (plan, score)
+print "Got plan '%s' with score %d, verify" % (plan, w2.scores)
 
 w = w_init.clone ()
 for a in plan:

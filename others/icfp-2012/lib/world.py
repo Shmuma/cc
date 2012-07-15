@@ -36,7 +36,7 @@ class World (object):
 
         # preprocess lines, split it into parts
         for l in lines:
-            self.map_lines.insert (0, list (l.strip ()))
+            self.map_lines.insert (0, list (l.rstrip()))
 
         # process map data - locate robot, find lambdas, etc
         for i, l in enumerate (self.map_lines):

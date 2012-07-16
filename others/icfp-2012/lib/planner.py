@@ -15,6 +15,8 @@ def heur (world):
     """
     res = len (world.history)
     res += len (world.lambdas) * 50
+    if len (world.lambdas) > 0:
+        res += min (map (lambda lam: dist (world.robot, lam), world.lambdas)) * 5
     res += min (map (lambda lift: dist (world.robot, lift), world.lifts))
     
     return res
@@ -45,20 +47,24 @@ def make_plan (world):
         prio, w = heapq.heappop (heap)
         # not there yet - trying to move somewhere
         for a in "UDLR":
-            w2 = w.clone ()
-            if w2.do_action (a) == True:
-                return "".join (w2.history), w2
-            if w2.robot != w.robot:
-                # if we moved somewere
-                if not w2.tick ():
-                    # robot not destroyed - good
-                    entry = heap_entry (w2)
-                    heapq.heappush (heap, entry)
-                    if not best_world or w2.scores > best_world.scores:
-                        best_world = w2
-                        best_plan = "".join (best_world.history)
-                        if debug:
-                            print "Best world updated. Scores %d, plan %s" % (best_world.scores, best_plan)
+            # sanity check move
+            if w.action_possible (a):
+                w2 = w.clone ()
+                if w2.do_action (a) == True:
+                    return "".join (w2.history), w2
+#                if debug:
+#                    print "".join (w2.history)
+                if w2.robot != w.robot:
+                    # if we moved somewere
+                    if not w2.tick ():
+                        # robot not destroyed - good
+                        entry = heap_entry (w2)
+                        heapq.heappush (heap, entry)
+                        if not best_world or w2.scores > best_world.scores:
+                            best_world = w2
+                            best_plan = "".join (best_world.history)
+                            if debug:
+                                print "Best world updated. Scores %d, plan %s" % (best_world.scores, best_plan)
         # TODO: check that world is unstable and try to wait
     # no way to reach for a goal, TODO: need to track best world state (with max score and return it's history
     return best_plan+"A", best_world

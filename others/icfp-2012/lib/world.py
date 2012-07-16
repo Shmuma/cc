@@ -27,6 +27,7 @@ class World (object):
     # history of commands
     history = []
 
+    deltas = {"L": (-1, 0), "R": (+1, 0), "U": (0, +1), "D": (0, -1)}
 
     def parse (self, lines):
         """
@@ -131,6 +132,22 @@ class World (object):
                 pass
 
 
+    def action_possible (self, action):
+        if action in "AW":
+            return True
+        x, y = self.robot
+        dx, dy = self.deltas[action]
+        c = self.get_cell (x + dx, y + dy)
+        if c == '#':
+            return False
+        elif c == '*':
+            if self.in_bounds (x + 2*dx, y + 2*dy):
+                cc = self.get_cell (x + 2*dx, y + 2*dy)
+                if cc in "*#":
+                    return False
+        return True
+                
+
     def do_action (self, action):
         """
         Apply robot action to world. Return None if abort performed, true if maze completed, false
@@ -141,10 +158,10 @@ class World (object):
             self.scores += (self.init_lambdas_count - len (self.lambdas)) * 25
             return None
         self.scores -= 1
-        deltas = {"L": (-1, 0), "R": (+1, 0), "U": (0, +1), "D": (0, -1)}
-        if not action in deltas:
+        
+        if not action in self.deltas:
             return False
-        dx, dy = deltas[action]
+        dx, dy = self.deltas[action]
         x, y = self.robot
         nx, ny = x + dx, y + dy
         if not self.in_bounds (nx, ny):

@@ -36,6 +36,9 @@ class World (object):
 
         # preprocess lines, split it into parts
         for l in lines:
+            # ignore metadata completely
+            if len (l.rstrip ()) == 0:
+                break
             self.map_lines.insert (0, list (l.rstrip()))
 
         # process map data - locate robot, find lambdas, etc
@@ -56,7 +59,7 @@ class World (object):
             except:
                 pass
         self.init_lambdas_count = len (self.lambdas)
-        self.bounds = len (self.map_lines[0]), len (self.map_lines)       
+        self.bounds = max (map (len, self.map_lines)), len (self.map_lines)       
 
 
     def clone (self):
@@ -85,6 +88,7 @@ class World (object):
         print "Lambdas: %s" % self.lambdas
         print "Lifts: %s" % self.lifts
         print "Scores: %d" % self.scores
+        print "Bounds: %s" % str (self.bounds)
         self.show ()
 
 
@@ -109,7 +113,22 @@ class World (object):
         """
         Obtain cell's contents as char
         """
-        return self.map_lines[y][x]
+        try:
+            return self.map_lines[y][x]
+        except IndexError:
+            return ' '
+
+
+    def set_cells (self, *cells):
+        """
+        Assign cells contents. Each cell is a tuple with three items: x, y, c
+        """
+        for cell in cells:
+            try:
+                x, y, c = cell
+                self.map_lines[y][x] = c
+            except IndexError:
+                pass
 
 
     def do_action (self, action):
@@ -134,8 +153,7 @@ class World (object):
 
         if ch in ' .\\O':
             # move is valid, update map
-            self.map_lines[y][x] = ' '
-            self.map_lines[ny][nx] = 'R'
+            self.set_cells ((x, y, ' '), (nx, ny, 'R'))
             self.robot = nx, ny
             if ch == '\\':
                 self.scores += 25
@@ -148,9 +166,7 @@ class World (object):
             if action in "LR" and ch == "*":
                 n2x = x + 2*dx
                 if self.in_bounds (n2x, y) and self.get_cell (n2x, y) == ' ':
-                    self.map_lines[y][n2x] = '*'
-                    self.map_lines[y][x] = ' '
-                    self.map_lines[y][nx] = 'R'
+                    self.set_cells ((n2x, y, '*'), (x, y, ' '), (nx, y, 'R'))
                     self.robot = nx, ny
         return False
 
@@ -163,7 +179,7 @@ class World (object):
         # if lambdas counter reached zero, open all lifts
         if len (self.lambdas) == 0:
             for x,y in self.lifts:
-                self.map_lines[y][x] = 'O'
+                self.set_cells ((x, y, 'O'))
 
         # rocks fall (inefficient), don't process first line
         # we save falling rocks into list (rock coords, new_coord) to fulfill simulatenous update
@@ -194,8 +210,7 @@ class World (object):
         destroyed = False
         for s, d in fall_list:
 #            print "%s -> %s" % (s, d)
-            self.map_lines[s[1]][s[0]] = ' '
-            self.map_lines[d[1]][d[0]] = '*'
+            self.set_cells ((s[0], s[1], ' '), (d[0], d[1], '*'))
             # check for robot destruction
             if self.robot == (d[0], d[1]-1):
                 destroyed = True

@@ -3,6 +3,9 @@ import heapq
 from world import dist
 
 
+stop_planner = False
+debug = False
+
 def heur (world):
     """
     Heruistic function for A*.
@@ -32,11 +35,13 @@ def make_plan (world):
     # each entry in the heap is a pair of:
     # - sum of count of steps performed and heruistic
     # - world
+    global stop_planner
     heap = []
     best_world = None
     best_plan = None
     heapq.heappush (heap, heap_entry (world))
-    while len (heap) > 0:
+    stop_planner = False
+    while len (heap) > 0 and not stop_planner:
         prio, w = heapq.heappop (heap)
         # not there yet - trying to move somewhere
         for a in "UDLR":
@@ -52,8 +57,21 @@ def make_plan (world):
                     if not best_world or w2.scores > best_world.scores:
                         best_world = w2
                         best_plan = "".join (best_world.history)
-                        print "Best world updated. Scores %d, plan %s" % (best_world.scores, best_plan)
+                        if debug:
+                            print "Best world updated. Scores %d, plan %s" % (best_world.scores, best_plan)
         # TODO: check that world is unstable and try to wait
     # no way to reach for a goal, TODO: need to track best world state (with max score and return it's history
-    return best_plan, best_world
+    return best_plan+"A", best_world
 
+
+
+def planner_timeout ():
+    """
+    Routine callen from different thread context when time limit is about to
+    expire
+    """
+    global stop_planner
+    if debug:
+        print "Timeout, fall from planner"
+    stop_planner = True
+    

@@ -1,4 +1,7 @@
 import sys
+import time
+
+debug = True
 
 class World (object):
     """
@@ -71,6 +74,19 @@ class World (object):
         return World (field2, (x+dx, y+dy), self.height-1)
 
 
+class DFSNode (object):
+    """
+    Node used to keep state in iterative DFS
+    """
+    world = None
+    count = 0
+    moves = []
+    
+    def __init__ (self, world):
+        self.world = world
+        self.moves = list (world.valid_moves ())
+
+
 def solve (w, tgt):
 #    w.show ()
     res = 0
@@ -94,12 +110,22 @@ def solve (w, tgt):
 def read_data ():
     return map (int, sys.stdin.readline ().strip ().split (" "))
 
-t = int (sys.stdin.readline ().strip ())
-for i in range (t):
-    n, m = read_data ()
-    sx, sy = read_data ()
-    fx, fy = read_data ()
-    field = [read_data () for r in range (n)]
+if __name__ == "__main__":
+    t = int (sys.stdin.readline ().strip ())
+    s_start = time.time ()
+    for i in range (t):
+        t_start = time.time ()
+        n, m = read_data ()
+        sx, sy = read_data ()
+        fx, fy = read_data ()
+        field = [read_data () for r in range (n)]
 #    field.reverse ()
-    w = World (field, (sy-1, sx-1))
-    print solve (w, (fy-1, fx-1))
+        w = World (field, (sy-1, sx-1))
+        print solve (w, (fy-1, fx-1))
+        if debug:
+            sys.stderr.write ("Solved %dx%d in %.5f seconds\n" % (n, m, time.time () - t_start))
+    if debug:
+        sys.stderr.write ("Suite solved in %.5f\n" % (time.time () - s_start))
+
+
+# 1. test001: 8.64300

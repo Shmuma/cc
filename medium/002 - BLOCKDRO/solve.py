@@ -1,6 +1,6 @@
 import sys
 import time
-import hashlib
+import binascii
 
 debug = True
 
@@ -88,7 +88,7 @@ class World (object):
         Return hash of world state
         """
         if self._hash == None:
-            self._hash =  hashlib.md5 (str (self.field) + str (self.pos)).digest ()
+            self._hash = binascii.crc32 (str (self.field) + str (self.pos))
         return self._hash
 
 

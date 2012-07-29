@@ -3,7 +3,7 @@ import random
 
 from solve import World
 
-steps_min, steps_max = 13, 13
+steps_min, steps_max = 25, 25
 
 tests = 1
 if len (sys.argv) == 2:

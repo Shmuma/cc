@@ -1,5 +1,6 @@
 import sys
 import time
+import hashlib
 
 debug = True
 
@@ -10,6 +11,7 @@ class World (object):
     field = []
     pos = 0, 0
     height = 0
+    _hash = None
 
     def __init__ (self, field, pos, height = None):
         self.field = field
@@ -74,6 +76,22 @@ class World (object):
         return World (field2, (x+dx, y+dy), self.height-1)
 
 
+    def is_finish (self, target):
+        """
+        Check that this is finishing state
+        """
+        return self.height == 1 and self.pos == target
+
+
+    def hash (self):
+        """
+        Return hash of world state
+        """
+        if self._hash == None:
+            self._hash =  hashlib.md5 (str (self.field) + str (self.pos)).digest ()
+        return self._hash
+
+
 class DFSNode (object):
     """
     Node used to keep state in iterative DFS
@@ -88,24 +106,41 @@ class DFSNode (object):
 
 
 def solve (w, tgt):
-#    w.show ()
     res = 0
-
-    q = [w]
-    while len (q) > 0:
-        w = q.pop (0) 
-#        if w.height == 2:
-#        print "Pop"
-#        w.show ()
-        for c in w.valid_moves ():
-            w2 = w.move (c)
-#            print "Move: %s" % c
-#            w2.show ()
-            if w2.pos == tgt and w2.height == 1:
-#                print "Path: %s" % hist
-                res += 1
-            q.append (w2)
+    cache = {}
+    s = [DFSNode (w)]
+    while len (s) > 0:
+        node = s.pop () 
+        if len (node.moves) > 0:
+            # we have moves to do
+            # return node in stack
+            s.append (node)
+            # do move
+            c = node.moves.pop ()
+            w2 = node.world.move (c)
+            # if target reached - remember this, or push new node otherwise
+            if w2.is_finish (tgt):
+                node.count += 1
+            else:
+                # check in cache
+                h = w2.hash ()
+                if h in cache:
+                    node.count += cache[h]
+                else:
+                    s.append (DFSNode (w2))
+        else:
+            # all moves finished, if we have parent (topmost node in stack), we
+            # remember collected counter. If stack is empty, return counter - it
+            # is the solution
+            if len (s) > 0:
+                s[-1].count += node.count
+                # also, store in cache
+                h = node.world.hash ()
+                cache[h] = node.count
+            else:
+                res = node.count
     return res
+
 
 def read_data ():
     return map (int, sys.stdin.readline ().strip ().split (" "))

@@ -10,7 +10,7 @@ from lib.world import World, dist
 from lib.planner import make_plan, planner_timeout
 import lib.planner
 
-debug = True
+debug = False
 lib.planner.debug = debug
 
 def int_handler (signal, frame):
@@ -22,16 +22,22 @@ signal.signal (signal.SIGINT, int_handler)
 timer = threading.Timer (140, planner_timeout)
 timer.start ()
 
-w_init = World ()
-w_init.parse (sys.stdin.readlines ())
-if debug:
-    w_init.show_full ()
+try:
+    w_init = World ()
+    w_init.parse (sys.stdin.readlines ())
+    if debug:
+        w_init.show_full ()
 
-w = w_init.clone ()
-goals = [(dist (l, w.robot), l) for l in w.lambdas]
-plan, w2 = make_plan (w)
+    w = w_init.clone ()
+    goals = [(dist (l, w.robot), l) for l in w.lambdas]
+    plan, w2 = make_plan (w)
 
-print plan
+    print plan
+except:
+    pass
+
+timer.cancel ()
+
 #plan = "LDRDDUULLLDDL"
 if debug:
     print "Got plan '%s' with score %d, verify" % (plan, w2.scores)
@@ -52,4 +58,3 @@ if debug:
             break
         w.show ()
     print "Scores: %d" % w.scores
-timer.cancel ()

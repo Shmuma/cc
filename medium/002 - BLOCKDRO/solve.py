@@ -1,8 +1,21 @@
 import sys
 import time
 import binascii
+import heapq
 
 debug = True
+
+moves_deltas = {'l': (-1,  0), 'L': (-2,  0),
+                'r': ( 1,  0), 'R': ( 2,  0),
+                'u': ( 0,  1), 'U': ( 0,  2),
+                'd': ( 0, -1), 'D': ( 0, -2)}
+
+def dist (a, b):
+    """
+    Manhattan distance
+    """
+    return abs (a[0] - b[0]) + abs (a[1] - b[1])
+
 
 class World (object):
     """
@@ -34,12 +47,14 @@ class World (object):
         print ""
 
 
-    def valid_moves (self):
+    def valid_moves (self, pos = None):
         """
         Return list of possible moves
         """
         res = ""
-        x, y = self.pos
+        if pos == None:
+            pos = self.pos
+        x, y = pos
         sx, sy = len (self.field[0]), len (self.field)
         if x > 0 and self.field[y][x-1] > 0:
             res += "l"
@@ -67,10 +82,7 @@ class World (object):
         char, one of 'uUdDrRlL'.
         """
         x, y = self.pos
-        dx, dy = {'l': (-1,  0), 'L': (-2,  0),
-                  'r': ( 1,  0), 'R': ( 2,  0),
-                  'u': ( 0,  1), 'U': ( 0,  2),
-                  'd': ( 0, -1), 'D': ( 0, -2)}[dir]
+        dx, dy = moves_deltas[dir]
         field2 = [list (l) for l in self.field]
         field2[y][x] -= 1
         return World (field2, (x+dx, y+dy), self.height-1)
@@ -90,6 +102,31 @@ class World (object):
         if self._hash == None:
             self._hash = binascii.crc32 (str (self.field) + str (self.pos))
         return self._hash
+
+
+    def is_bad (self, tgt):
+        """
+        Returns true if states is bad:
+        - there is no path from current position to target (A*)
+        """
+        return not self.have_path (tgt)
+
+
+    def have_path (self, tgt):
+        h = [(dist (tgt, self.pos), self.pos)]
+        stones = set ()
+
+        while len (h) > 0:
+            d, pos = heapq.heappop (h)
+            if pos == tgt:
+                return True
+            for c in self.valid_moves (pos):
+                dx, dy = moves_deltas[c]
+                npos = pos[0] + dx, pos[1] + dy
+                if not npos in stones:
+                    stones.add (npos)
+                    heapq.heappush (h, (dist (tgt, npos), npos))
+        return False
 
 
 class DFSNode (object):
@@ -126,7 +163,7 @@ def solve (w, tgt):
                 h = w2.hash ()
                 if h in cache:
                     node.count += cache[h]
-                else:
+                elif not w2.is_bad (tgt):
                     s.append (DFSNode (w2))
         else:
             # all moves finished, if we have parent (topmost node in stack), we
@@ -162,5 +199,3 @@ if __name__ == "__main__":
     if debug:
         sys.stderr.write ("Suite solved in %.5f\n" % (time.time () - s_start))
 
-
-# 1. test001: 8.64300

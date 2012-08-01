@@ -29,8 +29,24 @@ def simplify_ints (ints, n):
         yield (pos, n, 0)
 
 
+def group_ints (ints):
+    cur = None
+    for i in ints:
+        if cur == None:
+            cur = i
+        else:
+            if cur[0] == i[0] and cur[1] == i[1]:
+                cur = cur[0], cur[1], cur[2] + i[2]
+            else:
+                yield cur
+                cur = i
+    if cur != None:
+        yield cur
+
+
 def solve (ints, n):
     ints.sort ()
+    s_ints = [i for i in group_ints (ints)]
 #    print ints
     mmin, mmax = n, 0
     for i in simplify_ints (ints, n):

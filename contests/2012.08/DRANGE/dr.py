@@ -1,6 +1,5 @@
 import sys
 
-
 def simplify_ints (ints, n):
     pos = 1
     for i_idx, i in enumerate (ints):
@@ -46,10 +45,12 @@ def group_ints (ints):
 
 def solve (ints, n):
     ints.sort ()
+
     s_ints = [i for i in group_ints (ints)]
+
 #    print ints
     mmin, mmax = n, 0
-    for i in simplify_ints (ints, n):
+    for i in simplify_ints (s_ints, n):
         f, t, d = i
         mmin = min (mmin, f+d)
         mmax = max (mmax, t+d)

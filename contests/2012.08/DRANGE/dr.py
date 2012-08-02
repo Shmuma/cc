@@ -6,21 +6,29 @@ import bisect
 # merge it's requests for x and x+1
 
 def lookup_middelta (cache, ints, p):
+    """
+    Returns pair of deltas for point p and p+1
+    """
     v = cache.get (p, None)
     if v != None:
         return v
-#    print "lookup: %s" % str (p)
     idx = bisect.bisect_right (ints, (p,))
-    d = 0
+    d1, d2 = 0, 0
     for i in ints[idx-1:]:
-        if i[0] >= p:
+        f, t, d = i
+        if f >= p+1:
             break
-        if i[1] <= p:
+        if t <= p:
             continue
-        d += i[2]
-#    print "delta: %d" % d
-    cache[p] = d
-    return d
+        if p > f and t > p+1:
+            d1 += d
+            d2 += d
+        elif f == p and t > p+1:
+            d2 += d
+        elif f < p and t == p+1:
+            d1 += d
+    cache[p] = d1, d2
+    return d1, d2
 
 
 def solve (ints, n):
@@ -33,24 +41,23 @@ def solve (ints, n):
 #        print i
         f, t, d = i
 
+        md_fm, md_f = lookup_middelta (middelta_cache, ints, f-1)
         # f
-        md = lookup_middelta (middelta_cache, ints, f)
         v = pts.get (f, f)
-        pts[f] = v + d + md
-        # t
-        md = lookup_middelta (middelta_cache, ints, t)
-        v = pts.get (t, t)
-        pts[t] = v + d + md
+        pts[f] = v + d + md_f
         # f-1
-        md = lookup_middelta (middelta_cache, ints, f-1)
-        if md != 0:
+        if md_fm != 0:
             v = pts.get (f-1, f-1)
-            pts[f-1] = v + md
+            pts[f-1] = v + md_fm
+
+        md_t, md_tp = lookup_middelta (middelta_cache, ints, t)
+        # t
+        v = pts.get (t, t)
+        pts[t] = v + d + md_t
         # t+1
-        md = lookup_middelta (middelta_cache, ints, t+1)
-        if md != 0:
+        if md_tp != 0:
             v = pts.get (t+1, t+1)
-            pts[t+1] = v + md
+            pts[t+1] = v + md_tp
 
     mmin = n
     mmax = 0

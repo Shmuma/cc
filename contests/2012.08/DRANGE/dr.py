@@ -1,60 +1,59 @@
 import sys
-
-def simplify_ints (ints, n):
-    pos = 1
-    for i_idx, i in enumerate (ints):
-        f, t, d = i
-        while pos < i[1]:
-            if f < pos:
-                f = pos
-            elif f > pos:
-                yield (pos, f, 0)
-                pos = f
-            flag = False
-            for j in ints[i_idx+1:]:
-                ff, tt, dd = j
-                if ff > pos:
-                    yield (pos, ff, d)
-                    pos = ff
-                    flag = True
-                    break
-                else:
-                    t = min (t, tt)
-                    d += dd
-            if not flag:
-                yield (pos, t, d)
-                pos = t+1
-    if pos <= n:
-        yield (pos, n, 0)
+import bisect
 
 
-def group_ints (ints):
-    cur = None
-    for i in ints:
-        if cur == None:
-            cur = i
-        else:
-            if cur[0] == i[0] and cur[1] == i[1]:
-                cur = cur[0], cur[1], cur[2] + i[2]
-            else:
-                yield cur
-                cur = i
-    if cur != None:
-        yield cur
+# cache lookup_middelta
+# merge it's requests for x and x+1
+
+def lookup_middelta (ints, p):
+#    print "lookup: %s" % str (p)
+    idx = bisect.bisect_right (ints, (p,))
+    d = 0
+    for i in ints[idx-1:]:
+        if i[0] >= p:
+            break
+        if i[1] <= p:
+            continue
+        d += i[2]
+#    print "delta: %d" % d
+    return d
 
 
 def solve (ints, n):
+    pts = {1: 1, n: n}  
+
     ints.sort ()
 
-    s_ints = [i for i in group_ints (ints)]
-
-#    print ints
-    mmin, mmax = n, 0
-    for i in simplify_ints (s_ints, n):
-        f, t, d = i
-        mmin = min (mmin, f+d)
-        mmax = max (mmax, t+d)
+    for i in ints:
 #        print i
+        f, t, d = i
+
+        # f
+        md = lookup_middelta (ints, f)
+        v = pts.get (f, f)
+        pts[f] = v + d + md
+        # t
+        md = lookup_middelta (ints, t)
+        v = pts.get (t, t)
+        pts[t] = v + d + md
+        # f-1
+        md = lookup_middelta (ints, f-1)
+        if md != 0:
+            v = pts.get (f-1, f-1)
+            pts[f-1] = v + md
+        # t+1
+        md = lookup_middelta (ints, t+1)
+        if md != 0:
+            v = pts.get (t+1, t+1)
+            pts[t+1] = v + md
+
+    mmin = n
+    mmax = 0
+    for v in pts.values ():
+        mmin = min (mmin, v)
+        mmax = max (mmax, v)
+
+#    print mmin, mmax
     return mmin, mmax
 
 

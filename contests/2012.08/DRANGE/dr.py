@@ -5,7 +5,10 @@ import bisect
 # cache lookup_middelta
 # merge it's requests for x and x+1
 
-def lookup_middelta (ints, p):
+def lookup_middelta (cache, ints, p):
+    v = cache.get (p, None)
+    if v != None:
+        return v
 #    print "lookup: %s" % str (p)
     idx = bisect.bisect_right (ints, (p,))
     d = 0
@@ -16,11 +19,13 @@ def lookup_middelta (ints, p):
             continue
         d += i[2]
 #    print "delta: %d" % d
+    cache[p] = d
     return d
 
 
 def solve (ints, n):
-    pts = {1: 1, n: n}  
+    pts = {1: 1, n: n}
+    middelta_cache = {}
 
     ints.sort ()
 
@@ -29,20 +34,20 @@ def solve (ints, n):
         f, t, d = i
 
         # f
-        md = lookup_middelta (ints, f)
+        md = lookup_middelta (middelta_cache, ints, f)
         v = pts.get (f, f)
         pts[f] = v + d + md
         # t
-        md = lookup_middelta (ints, t)
+        md = lookup_middelta (middelta_cache, ints, t)
         v = pts.get (t, t)
         pts[t] = v + d + md
         # f-1
-        md = lookup_middelta (ints, f-1)
+        md = lookup_middelta (middelta_cache, ints, f-1)
         if md != 0:
             v = pts.get (f-1, f-1)
             pts[f-1] = v + md
         # t+1
-        md = lookup_middelta (ints, t+1)
+        md = lookup_middelta (middelta_cache, ints, t+1)
         if md != 0:
             v = pts.get (t+1, t+1)
             pts[t+1] = v + md

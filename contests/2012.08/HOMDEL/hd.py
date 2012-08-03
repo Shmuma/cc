@@ -36,6 +36,32 @@ def solve (g, src, gas, dest):
 #    return t1, t1 - from_src[dest]
 
 
+def heur (g, src, dest):
+    if src in g:
+        for n, w in g[src]:
+            if n == dest:
+                return w
+    return 10000
+ 
+ 
+def find_path_len (g, src, dest):
+    if (src == dest):
+        return 0
+    front = []
+    if src in g:
+        for n, w in g[src]:
+            heapq.heappush (front, (heur (g, src, dest) + w, n, w))
+    while len (front) > 0:
+        h, n, w = heapq.heappop (front)
+        if n == dest:
+            return w
+        if n in g:
+            for nn, ww in g[n]:
+                heapq.heappush (front, (heur (g, n, nn) + w+ww, nn, w+ww))
+    print "path from %d to %d not found" % (src, dest)
+    return 10000
+
+
 n = readints ()[0]
 g = {}
 for i in range (n):

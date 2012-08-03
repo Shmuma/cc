@@ -89,9 +89,9 @@ for m in range (readints ()[0]):
 
 results = {}
 for src in s_src:
-    dist = deikstra (g, src, queries[src])
+#    dist = deikstra (g, src, queries[src])
     for q in queries[src]:
-        results[(src, q)] = dist[q]
+        results[(src, q)] = find_path_len (g, src, q)
 
 #print results
 for src, gas, dest in tests:

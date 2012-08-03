@@ -29,10 +29,11 @@ def deikstra (g, src, tgt_set):
 
 
 def solve (g, src, gas, dest):
-    from_src = deikstra (g, src, set ([gas, dest]))
-    from_gas = deikstra (g, gas, set ([dest]))
-    t1 = from_src[gas] + from_gas[dest]
-    return t1, t1 - from_src[dest]
+    pass
+#    from_src = deikstra (g, src, set ([gas, dest]))
+#    from_gas = deikstra (g, gas, set ([dest]))
+#    t1 = from_src[gas] + from_gas[dest]
+#    return t1, t1 - from_src[dest]
 
 
 n = readints ()[0]
@@ -42,7 +43,32 @@ for i in range (n):
         if i != j:
             g[i] = g.get (i, []) + [(j, v)]
 
+tests = []
+s_src = set ()
+queries = {}
 for m in range (readints ()[0]):
     src, gas, dest = readints ()
-    p1, p2 = solve (g, src, gas, dest)
-    print p1, p2
+    tests.append ((src, gas, dest))
+    s_src.add (src)
+    s_src.add (gas)
+
+    s = queries.get (src, set ())
+    s.add (gas)
+    s.add (dest)
+    queries[src] = s
+
+    s = queries.get (gas, set ())
+    s.add (dest)
+    queries[gas] = s
+
+results = {}
+for src in s_src:
+    dist = deikstra (g, src, queries[src])
+    for q in queries[src]:
+        results[(src, q)] = dist[q]
+
+#print results
+for src, gas, dest in tests:
+    v1 = results[(src, gas)] + results[(gas, dest)]
+    v2 = results[(src, dest)]
+    print v1, v1-v2

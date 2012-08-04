@@ -102,61 +102,41 @@ void solve (const graph_t& g, int src, int gas, int dest, int& p1, int& p2)
 int main ()
 {
     int n;
-    graph_t g;
+
+    int** graph;
 
     cin >> n;
+
+    graph = (int**)malloc (sizeof (int*) * n);
+
     for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-            int v;
-            cin >> v;
-            if (i == j)
-                continue;
-            g.insert (pair <int, edge_t > (i, edge_t (j, v)));
+        graph[i] = (int*)malloc (sizeof (int) * n);
+        for (int j = 0; j < n; j++)
+            cin >> graph[i][j];
+    }
+
+    for (int k = 0; k < n; k++) {
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                int v = graph[i][k] + graph[k][j];
+                if (graph[i][j] > v)
+                    graph[i][j] = v;
+            }
         }
     }
 
     int m;
     cin >> m;
-    queries_t queries;
-    tests_t tests;
 
     for (int t = 0; t < m; t++) {
         int src, gas, dest;
         cin >> src >> gas >> dest;
-        tests.push_back (test (src, gas, dest));
-        queries[src].insert (gas);
-        queries[src].insert (dest);
-        queries[gas].insert (dest);
-//        int p1, p2;
-//        solve (g, src, gas, dest, p1, p2);
-//        cout << p1 << " " << p2 << endl;
-    }
+        int v1, v2;
 
-    results_t results;
-    queries_t::const_iterator it = queries.begin ();
-    dist_t dist;
+        v1 = graph[src][gas] + graph[gas][dest];
+        v2 = graph[src][dest];
 
-    while (it != queries.end ()) {
-        dist.clear ();
-        done_t needed = done_t ((*it).second.begin (), (*it).second.end ());
-        dijkstra (g, (*it).first, dist, needed);
-        done_t::const_iterator q_it = (*it).second.begin ();
-
-        while (q_it != (*it).second.end ()) {
-            results[edge_t((*it).first, *q_it)] = dist[*q_it];
-            q_it++;
-        }
-        it++;
-    }
-
-    tests_t::const_iterator t_it = tests.begin ();
-    while (t_it != tests.end ()) {
-        int p1, p2;
-
-        p1 = results[edge_t (t_it->src, t_it->gas)] + results[edge_t (t_it->gas, t_it->dest)];
-        p2 = results[edge_t (t_it->src, t_it->dest)];
-        cout << p1 << " " << p1 - p2 << endl;
-        t_it++;
+        cout << v1 << " " << v1 - v2 << endl;
     }
 
     return 0;

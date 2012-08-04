@@ -29,52 +29,21 @@ def deikstra (g, src, tgt_set):
 
 
 n = readints ()[0]
-g = {}
+g = []
 for i in range (n):
-    for j, v in enumerate (readints ()):
-        if i != j:
-            g[i] = g.get (i, []) + [(j, v)]
+    g.append (readints ())
 
-tests = []
-s_src = set ()
-queries = {}
-results = {}
+
+for i in range (n):
+    for j in range (n):
+        for k in range (n):
+            v = g[i][k] + g[k][j]
+            if g[i][j] > v:
+                g[i][j] = v
+
 
 for m in range (readints ()[0]):
     src, gas, dest = readints ()
-    tests.append ((src, gas, dest))
-
-    s_src.add (src)
-    s_src.add (gas)
-
-    s = queries.get (src, set ())
-    s.add (gas)
-    s.add (dest)
-    queries[src] = s
-
-    s = queries.get (gas, set ())
-    s.add (dest)
-    queries[gas] = s
-
-for src in s_src:
-    dist = None
-    new_q = set ()
-    for q in queries[src]:
-        if src != q:
-            new_q.add (q)
-        else:
-            results[(src, q)] = 0
-
-    if len (new_q) > 0:
-        dist = deikstra (g, src, new_q)
-        for q in new_q:   
-            results[(src, q)] = dist[q]
-
-    
-
-
-#print results
-for src, gas, dest in tests:
-    v1 = results[(src, gas)] + results[(gas, dest)]
-    v2 = results[(src, dest)]
+    v1 = g[src][gas] + g[gas][dest]
+    v2 = g[src][dest]
     print v1, v1-v2

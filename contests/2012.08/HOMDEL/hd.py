@@ -24,42 +24,8 @@ def deikstra (g, src, tgt_set):
         if n in g:
             for nn, ww in g[n]:
                 if not nn in done:
-                    heapq.heappush (front, (nn, w + ww))
+                    heapq.heappush (front, (w + ww, nn))
     return dist
-
-
-def solve (g, src, gas, dest):
-    pass
-#    from_src = deikstra (g, src, set ([gas, dest]))
-#    from_gas = deikstra (g, gas, set ([dest]))
-#    t1 = from_src[gas] + from_gas[dest]
-#    return t1, t1 - from_src[dest]
-
-
-def heur (g, src, dest):
-    if src in g:
-        for n, w in g[src]:
-            if n == dest:
-                return w
-    return 10000
- 
- 
-def find_path_len (g, src, dest):
-    if (src == dest):
-        return 0
-    front = []
-    if src in g:
-        for n, w in g[src]:
-            heapq.heappush (front, (heur (g, src, dest) + w, n, w))
-    while len (front) > 0:
-        h, n, w = heapq.heappop (front)
-        if n == dest:
-            return w
-        if n in g:
-            for nn, ww in g[n]:
-                heapq.heappush (front, (heur (g, n, nn) + w+ww, nn, w+ww))
-    print "path from %d to %d not found" % (src, dest)
-    return 10000
 
 
 n = readints ()[0]
@@ -72,9 +38,12 @@ for i in range (n):
 tests = []
 s_src = set ()
 queries = {}
+results = {}
+
 for m in range (readints ()[0]):
     src, gas, dest = readints ()
     tests.append ((src, gas, dest))
+
     s_src.add (src)
     s_src.add (gas)
 
@@ -87,11 +56,22 @@ for m in range (readints ()[0]):
     s.add (dest)
     queries[gas] = s
 
-results = {}
 for src in s_src:
-#    dist = deikstra (g, src, queries[src])
+    dist = None
+    new_q = set ()
     for q in queries[src]:
-        results[(src, q)] = find_path_len (g, src, q)
+        if src != q:
+            new_q.add (q)
+        else:
+            results[(src, q)] = 0
+
+    if len (new_q) > 0:
+        dist = deikstra (g, src, new_q)
+        for q in new_q:   
+            results[(src, q)] = dist[q]
+
+    
+
 
 #print results
 for src, gas, dest in tests:

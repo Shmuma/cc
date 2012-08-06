@@ -12,6 +12,7 @@ def lookup_middelta (cache, ints, p):
     v = cache.get (p, None)
     if v != None:
         return v
+    # invalid - we must find first int with end > p
     idx = bisect.bisect_right (ints, (p,))
     d1, d2 = 0, 0
     for i in ints[idx-1:]:
@@ -72,7 +73,6 @@ def solve (ints, n):
 
 for t in range (int (sys.stdin.readline ().strip ())):
     n, m = map (int, sys.stdin.readline ().strip ().split (' '))
-    r = range (1, n+1)
 
     # intervals (from, to, delta)
     ints = []

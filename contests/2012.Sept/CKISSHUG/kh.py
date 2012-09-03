@@ -11,7 +11,7 @@ def solve (n):
 
 def solve2 (n):   
     p = int ((n-1)/2)
-    res = ((2**(p)-1) << 1) % 1000000007
+    res = (((1<<p)-1) << 1) % 1000000007
     if n % 2 == 1:
         res += (1 << (p+1)) % 1000000007
     else:
@@ -32,12 +32,12 @@ def solve2 (n):
 #    print "%4d %s" % (i, s)
 #sys.exit (1)
 
-v = (2**2000) % 1000000007
-print v 
-vv = (2**1000) % 1000000007
-print vv
-print (vv*vv) % 1000000007
-sys.exit (1)
+#v = (2**2000) % 1000000007
+#print v 
+#vv = (2**1000) % 1000000007
+#print vv
+#print (vv*vv) % 1000000007
+#sys.exit (1)
 
 
 t = int (sys.stdin.readline ().strip ())
